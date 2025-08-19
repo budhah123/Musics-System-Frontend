@@ -115,7 +115,16 @@ export function AuthProvider({ children }) {
           
           // Restore user state from localStorage if available
           const savedUser = localStorage.getItem('user');
-          const user = savedUser ? JSON.parse(savedUser) : { id: 1, email: 'user@example.com', name: 'User' };
+          if (savedUser) {
+            const user = JSON.parse(savedUser);
+            dispatch({ 
+              type: AUTH_ACTIONS.LOGIN_SUCCESS, 
+              payload: { user, token } 
+            });
+          } else {
+            // No saved user, stay unauthenticated
+            dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
+          }
           
           dispatch({ 
             type: AUTH_ACTIONS.LOGIN_SUCCESS, 
@@ -170,11 +179,16 @@ export function AuthProvider({ children }) {
       
       // Handle successful login
       const user = { 
-        id: response.id || response._id || response.user?.id || Math.random().toString(36).substr(2, 9), 
+        id: response.id || response._id || response.user?.id || response.userId, 
         email: email, 
         name: response.name || response.FullName || response.user?.name || 'User' 
       };
-      const token = response.token || response.accessToken || response.user?.token || 'default-token';
+      const token = response.token || response.accessToken || response.user?.token;
+      
+      // Validate that we have a proper user ID
+      if (!user.id) {
+        throw new Error('Invalid user ID received from server');
+      }
       
       // Save user data to localStorage
       localStorage.setItem('user', JSON.stringify(user));

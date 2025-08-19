@@ -49,6 +49,159 @@ export async function testMusicsEndpoint() {
   }
 }
 
+// Test favorites endpoint specifically
+export async function testFavoritesEndpoint(userId, token = null) {
+  try {
+    console.log('Testing favorites endpoint for user:', userId);
+    
+    // Test multiple possible endpoint structures
+    const endpoints = [
+      `${API_BASE}/favorites/users/${userId}`,
+      `${API_BASE}/favorites?userId=${userId}`,
+      `${API_BASE}/favorites/${userId}`,
+      `${API_BASE}/users/${userId}/favorites`
+    ];
+    
+    const headers = {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    };
+    
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    console.log('Testing with headers:', headers);
+    
+    for (const endpoint of endpoints) {
+      try {
+        console.log('Testing endpoint:', endpoint);
+        const res = await fetch(endpoint, { 
+          method: 'GET',
+          mode: 'cors',
+          headers,
+          credentials: 'include'
+        });
+        console.log(`Endpoint ${endpoint} result:`, res.status, res.statusText);
+        
+        if (res.ok) {
+          return { ok: true, status: res.status, statusText: res.statusText, workingEndpoint: endpoint };
+        }
+      } catch (error) {
+        console.log(`Endpoint ${endpoint} failed:`, error.message);
+      }
+    }
+    
+    // If none worked, return the first endpoint result
+    const res = await fetch(endpoints[0], { 
+      method: 'GET',
+      mode: 'cors',
+      headers,
+      credentials: 'include'
+    });
+    return { ok: res.ok, status: res.status, statusText: res.statusText, workingEndpoint: null };
+  } catch (error) {
+    console.error('Favorites endpoint test error:', error);
+    return { ok: false, error: error.message };
+  }
+}
+
+// Simple test function that mimics Postman exactly
+export async function testPostmanStyle(userId, token = null) {
+  try {
+    console.log('=== POSTMAN STYLE TEST ===');
+    console.log('User ID:', userId);
+    console.log('Token:', token);
+    console.log('URL:', `${API_BASE}/favorites/users/${userId}`);
+    
+    // Try without CORS mode first (like Postman)
+    const res = await fetch(`${API_BASE}/favorites/users/${userId}`, { 
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        ...(token && { 'Authorization': `Bearer ${token}` })
+      }
+    });
+    
+    console.log('Response status:', res.status);
+    console.log('Response headers:', Object.fromEntries(res.headers.entries()));
+    
+    if (res.ok) {
+      const data = await res.json();
+      console.log('Response data:', data);
+      return { success: true, data, status: res.status };
+    } else {
+      const errorText = await res.text();
+      console.log('Error response:', errorText);
+      return { success: false, error: errorText, status: res.status };
+    }
+  } catch (error) {
+    console.error('Postman style test failed:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+// Test CORS issue specifically
+export async function testCORS(userId, token = null) {
+  try {
+    console.log('=== CORS TEST ===');
+    
+    // Test 1: No CORS mode
+    try {
+      const res1 = await fetch(`${API_BASE}/favorites/users/${userId}`, { 
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` })
+        }
+      });
+      console.log('No CORS mode result:', res1.status, res1.statusText);
+    } catch (error) {
+      console.log('No CORS mode failed:', error.message);
+    }
+    
+    // Test 2: With CORS mode
+    try {
+      const res2 = await fetch(`${API_BASE}/favorites/users/${userId}`, { 
+        method: 'GET',
+        mode: 'cors',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` })
+        }
+      });
+      console.log('With CORS mode result:', res2.status, res2.statusText);
+    } catch (error) {
+      console.log('With CORS mode failed:', error.message);
+    }
+    
+    // Test 3: With credentials
+    try {
+      const res3 = await fetch(`${API_BASE}/favorites/users/${userId}`, { 
+        method: 'GET',
+        mode: 'cors',
+        credentials: 'include',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` })
+        }
+      });
+      console.log('With credentials result:', res3.status, res3.statusText);
+    } catch (error) {
+      console.log('With credentials failed:', error.message);
+    }
+    
+    return { success: true, message: 'CORS tests completed - check console' };
+  } catch (error) {
+    console.error('CORS test failed:', error);
+    return { success: false, error: error.message };
+  }
+}
+
 // Register a new user with 'FullName'
 export async function registerUser(fullname, email, password) {
   try {
@@ -154,6 +307,8 @@ export async function fetchMusics() {
     throw new Error(error.message || 'Network error');
   }
 }
+
+
 
 // Create a new music entry
 export async function createMusic(token, { musicFile, thumbnailFile, title, artist, genre, duration }) {
@@ -357,21 +512,54 @@ export async function deleteUser(token, id) {
 // ===== FAVORITES API FUNCTIONS =====
 
 // Fetch all favorites for a user
-export async function fetchUserFavorites(userId) {
+export async function fetchUserFavorites(userId, token = null) {
   try {
     console.log('API: Fetching favorites for user:', userId);
+    console.log('API: Full URL:', `${API_BASE}/favorites/users/${userId}`);
+    console.log('API: User ID type:', typeof userId, 'Value:', userId);
+    console.log('API: Token provided:', !!token);
+    console.log('API: Full headers:', { 'Accept': 'application/json', 'Content-Type': 'application/json', ...(token && { 'Authorization': `Bearer ${token}` }) });
+    
+    // Validate userId
+    if (!userId || userId === 'undefined' || userId === 'null') {
+      throw new Error('Invalid user ID provided');
+    }
+    
+    // Prepare headers
+    const headers = {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    };
+    
+    // Add authorization header if token is provided
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    console.log('API: Making request with headers:', headers);
+    
     const res = await fetch(`${API_BASE}/favorites/users/${userId}`, {
       method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      }
+      headers,
+      mode: 'cors'
+      // Removed credentials: 'include' which was causing CORS issues
     });
 
     if (!res.ok) {
       const errorText = await res.text();
       console.error('API: fetchUserFavorites failed with status:', res.status, 'Error:', errorText);
-      throw new Error(`Failed to fetch favorites (${res.status}): ${errorText}`);
+      
+      if (res.status === 404) {
+        throw new Error('User not found or no favorites available');
+      } else if (res.status === 401) {
+        throw new Error('Authentication required');
+      } else if (res.status === 403) {
+        throw new Error('Access forbidden');
+      } else if (res.status >= 500) {
+        throw new Error('Server error - please try again later');
+      } else {
+        throw new Error(`Failed to fetch favorites (${res.status}): ${errorText}`);
+      }
     }
 
     const data = await res.json();
@@ -393,6 +581,7 @@ export async function addToFavorites(userId, musicId) {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
       },
+      mode: 'cors',
       body: JSON.stringify({ userId, musicId })
     });
 
@@ -421,6 +610,7 @@ export async function removeFromFavorites(userId, musicId) {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
       },
+      mode: 'cors',
       body: JSON.stringify({ userId, musicId })
     });
 
@@ -430,7 +620,13 @@ export async function removeFromFavorites(userId, musicId) {
       throw new Error(`Failed to remove from favorites (${res.status}): ${errorText}`);
     }
 
-    const data = await res.json();
+    let data;
+    try {
+      data = await res.json();
+    } catch (parseError) {
+      data = { success: true };
+    }
+
     console.log('API: Removed from favorites successfully:', data);
     return data;
   } catch (error) {

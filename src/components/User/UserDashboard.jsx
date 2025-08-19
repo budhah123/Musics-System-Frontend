@@ -106,7 +106,7 @@ export default function UserDashboard() {
           <MusicList 
             musics={musics} 
             onDelete={handleDeleteMusic} 
-            userLoggedIn={true} 
+            userLoggedIn={user} 
           />
         )}
       </div>

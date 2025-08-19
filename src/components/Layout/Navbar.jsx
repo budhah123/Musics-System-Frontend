@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { FaMusic, FaHome, FaSignOutAlt, FaUser, FaUserCog, FaHeart } from 'react-icons/fa';
+import { FaMusic, FaHome, FaSignOutAlt, FaUser, FaUserCog, FaHeart, FaDownload } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
 
 export default function Navbar() {
@@ -79,6 +79,13 @@ export default function Navbar() {
                 >
                   <FaHeart className="inline mr-2" />
                   Favorites
+                </Link>
+                <Link
+                  to="/user/downloads"
+                  className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                >
+                  <FaDownload className="inline mr-2" />
+                  Downloads
                 </Link>
               </>
             )}
@@ -198,13 +205,20 @@ export default function Navbar() {
                 <FaMusic className="inline mr-2" />
                 Music Library
               </Link>
-              <Link
-                to="/user/favorites"
-                className="text-gray-700 hover:text-indigo-600 block px-3 py-2 rounded-md text-base font-medium"
-              >
-                <FaHeart className="inline mr-2" />
-                Favorites
-              </Link>
+                             <Link
+                 to="/user/favorites"
+                 className="text-gray-700 hover:text-indigo-600 block px-3 py-2 rounded-md text-base font-medium"
+               >
+                 <FaHeart className="inline mr-2" />
+                 Favorites
+               </Link>
+               <Link
+                 to="/user/downloads"
+                 className="text-gray-700 hover:text-indigo-600 block px-3 py-2 rounded-md text-base font-medium"
+               >
+                 <FaDownload className="inline mr-2" />
+                 Downloads
+               </Link>
             </>
           )}
 

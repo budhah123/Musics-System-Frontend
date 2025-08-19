@@ -1,35 +1,57 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { FaHeart, FaMusic, FaTrash, FaPlay, FaPause } from 'react-icons/fa';
-import { useFavorites } from '../../context/FavoritesContext';
 import { useAuth } from '../../context/AuthContext';
-import { fetchMusics } from '../../api/api';
+import { fetchUserFavorites, removeFromFavorites } from '../../api/api';
 
 export default function Favorites() {
-  const { favorites, loading, error, removeFavorite, clearError } = useFavorites();
-  const { user } = useAuth();
-  const [musicData, setMusicData] = useState({});
+  const { user, token } = useAuth();
+  const [favorites, setFavorites] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [playingId, setPlayingId] = useState(null);
   const [audioRefs] = useState({});
 
-  // Fetch music details for favorites
+  // Fetch favorites from API on component mount
   useEffect(() => {
-    const fetchMusicDetails = async () => {
+    const fetchFavorites = async () => {
+      if (!user?.id) {
+        setLoading(false);
+        setError('User not authenticated. Please log in again.');
+        return;
+      }
+
       try {
-        const allMusic = await fetchMusics();
-        const musicMap = {};
-        allMusic.forEach(music => {
-          musicMap[music.id] = music;
-        });
-        setMusicData(musicMap);
-      } catch (error) {
-        console.error('Failed to fetch music details:', error);
+        setLoading(true);
+        setError(null);
+        
+        console.log('Fetching favorites for user:', user.id);
+        console.log('User object:', user);
+        console.log('Token available:', !!token);
+        
+        const data = await fetchUserFavorites(user.id, token);
+        console.log('Favorites data received:', data);
+        
+        // Handle different API response structures
+        if (Array.isArray(data)) {
+          setFavorites(data);
+        } else if (data && data.favorites) {
+          setFavorites(data.favorites);
+        } else if (data && data.data) {
+          setFavorites(data.data);
+        } else {
+          console.warn('Unexpected data structure:', data);
+          setFavorites([]);
+        }
+      } catch (err) {
+        console.error('Failed to fetch favorites:', err);
+        setError(err.message || 'Failed to load favorites');
+      } finally {
+        setLoading(false);
       }
     };
 
-    if (favorites.length > 0) {
-      fetchMusicDetails();
-    }
-  }, [favorites]);
+    fetchFavorites();
+  }, [user?.id, token]);
 
   const handlePlayPause = (musicId) => {
     if (playingId === musicId) {
@@ -40,12 +62,34 @@ export default function Favorites() {
   };
 
   const handleRemoveFavorite = async (musicId) => {
-    const success = await removeFavorite(musicId);
-    if (success) {
-      // Stop playing if the removed music was playing
-      if (playingId === musicId) {
-        setPlayingId(null);
+    try {
+      console.log('Removing from favorites:', musicId);
+      
+      // Call the API to remove from favorites
+      const result = await removeFromFavorites(user.id, musicId);
+      console.log('Remove result:', result);
+      
+      if (result.success || result.message) {
+        // Remove from local state
+        setFavorites(prevFavorites => 
+          prevFavorites.filter(fav => {
+            const music = fav.music || fav;
+            return music.id !== musicId;
+          })
+        );
+        
+        // Stop playing if the removed music was playing
+        if (playingId === musicId) {
+          setPlayingId(null);
+        }
+        
+        console.log('Successfully removed from favorites');
+      } else {
+        console.error('Failed to remove from favorites');
       }
+    } catch (error) {
+      console.error('Error removing from favorites:', error);
+      // You could show a toast notification here
     }
   };
 
@@ -80,7 +124,7 @@ export default function Favorites() {
               <h3 className="text-lg font-medium text-red-800 mb-2">Error Loading Favorites</h3>
               <p className="text-red-600 mb-4">{error}</p>
               <button
-                onClick={clearError}
+                onClick={() => window.location.reload()}
                 className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
               >
                 Try Again
@@ -128,7 +172,8 @@ export default function Favorites() {
         {/* Favorites Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {favorites.map((favorite) => {
-            const music = musicData[favorite.musicId];
+            // Handle different API response structures
+            const music = favorite.music || favorite;
             if (!music) return null;
 
             const thumbnailUrl = getThumbnailUrl(music);
@@ -137,7 +182,7 @@ export default function Favorites() {
 
             return (
               <div
-                key={favorite.musicId}
+                key={music.id || favorite.id}
                 className="bg-white border border-gray-300 rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-all duration-300"
               >
                 {/* Thumbnail */}

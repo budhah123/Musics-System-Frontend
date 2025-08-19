@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { FavoritesProvider } from './context/FavoritesContext';
+import { DownloadsProvider } from './context/DownloadsContext';
 import { ToastContainer } from './components/Common/Toast';
 import Navbar from './components/Layout/Navbar';
 import ProtectedRoute, { RequireAuth, RequireGuest } from './components/Layout/ProtectedRoute';
@@ -15,6 +16,7 @@ import Login from './components/User/Login';
 import Register from './components/User/Register';
 import UserDashboard from './components/User/UserDashboard';
 import Favorites from './components/User/Favorites';
+import Downloads from './components/User/Downloads';
 import ErrorBoundary from './components/Common/ErrorBoundary';
 
 // Admin Dashboard Components
@@ -28,7 +30,8 @@ function App() {
   return (
     <AuthProvider>
       <FavoritesProvider>
-        <Router>
+        <DownloadsProvider>
+          <Router>
           <div className="App">
             {/* Toast Notifications */}
             <ToastContainer />
@@ -79,6 +82,16 @@ function App() {
                   </RequireAuth>
                 } 
               />
+              <Route 
+                path="/user/downloads" 
+                element={
+                  <RequireAuth>
+                    <ErrorBoundary>
+                      <Downloads />
+                    </ErrorBoundary>
+                  </RequireAuth>
+                } 
+              />
               
               {/* Admin Dashboard Routes */}
               <Route path="/admin/login" element={<AdminLogin />} />
@@ -112,6 +125,7 @@ function App() {
             </Routes>
           </div>
         </Router>
+        </DownloadsProvider>
       </FavoritesProvider>
     </AuthProvider>
   );

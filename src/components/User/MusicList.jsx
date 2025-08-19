@@ -1,14 +1,17 @@
 import React, { useState, useRef } from 'react';
-import { FaPlay, FaPause, FaSearch, FaFilter, FaMusic, FaHeart, FaShare } from 'react-icons/fa';
+import { FaPlay, FaPause, FaSearch, FaFilter, FaMusic, FaHeart, FaShare, FaDownload } from 'react-icons/fa';
 import { useFavorites } from '../../context/FavoritesContext';
 import { useAuth } from '../../context/AuthContext';
+import { useDownloads } from '../../context/DownloadsContext';
+import axios from 'axios';
 
 export default function MusicList({ musics, userLoggedIn }) {
   // Ensure musics is always an array
   const safeMusics = Array.isArray(musics) ? musics : [];
   
   const { addFavorite, removeFavorite, isFavorite, error: favoritesError, clearError } = useFavorites();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user, addToast } = useAuth();
+  const { addDownload } = useDownloads();
   
   const [playingId, setPlayingId] = useState(null);
   const [showAudioPlayer, setShowAudioPlayer] = useState({});
@@ -40,16 +43,111 @@ export default function MusicList({ musics, userLoggedIn }) {
   };
 
   // Download functionality
-  const handleDownload = (music) => {
-    const audioUrl = getAudioUrl(music);
-    if (audioUrl) {
+  const [downloadStates, setDownloadStates] = useState({});
+  const [downloadError, setDownloadError] = useState(null);
+
+     const handleDownload = async (music) => {
+     if (!isAuthenticated) {
+       setDownloadError('Please login to download music');
+       return;
+     }
+
+     if (!user?.id && !user?.userId) {
+       setDownloadError('User ID not available. Please try logging in again.');
+       return;
+     }
+
+    const musicId = music.id;
+    setDownloadStates(prev => ({ ...prev, [musicId]: 'downloading' }));
+    setDownloadError(null);
+
+    try {
+             // Step 1: Save download record
+       const downloadResponse = await fetch('https://musics-system-2.onrender.com/downloads', {
+         method: 'POST',
+         headers: {
+           'Content-Type': 'application/json',
+         },
+         body: JSON.stringify({
+           userId: user?.id || user?.userId,
+           musicId: musicId
+         })
+       });
+
+             if (!downloadResponse.ok) {
+         if (downloadResponse.status === 400) {
+           throw new Error('Invalid request data. Please try again or contact support.');
+         }
+         throw new Error(`Failed to save download: ${downloadResponse.status}`);
+       }
+
+      // Step 2: Download the actual music file using Axios blob
+      const audioUrl = getAudioUrl(music);
+      if (!audioUrl) {
+        throw new Error('No audio URL available for this track');
+      }
+
+      const response = await axios.get(audioUrl, {
+        responseType: 'blob',
+        timeout: 30000, // 30 second timeout
+      });
+
+      // Create a blob URL and trigger download
+      const blob = new Blob([response.data], { 
+        type: response.headers['content-type'] || 'audio/mpeg' 
+      });
+      const url = window.URL.createObjectURL(blob);
+      
+      // Create download link
       const link = document.createElement('a');
-      link.href = audioUrl;
+      link.href = url;
       link.download = `${music.title || 'music'}.mp3`;
-      link.target = '_blank';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      
+      // Clean up blob URL
+      window.URL.revokeObjectURL(url);
+      
+             // Add download to context for real-time updates
+       addDownload({
+         userId: user?.id || user?.userId,
+         musicId: musicId
+       });
+      
+      // Show success toast
+      addToast(`Successfully downloaded ${music.title || 'music track'}!`, 'success');
+      
+      setDownloadStates(prev => ({ ...prev, [musicId]: 'success' }));
+      
+      // Reset success state after 2 seconds
+      setTimeout(() => {
+        setDownloadStates(prev => ({ ...prev, [musicId]: null }));
+      }, 2000);
+
+    } catch (error) {
+      console.error('Download failed:', error);
+      
+             let errorMessage = 'Download failed. Please try again.';
+       if (error.code === 'ECONNABORTED') {
+         errorMessage = 'Download timed out. Please try again.';
+       } else if (error.response?.status === 400) {
+         errorMessage = 'Invalid request data. Please try again or contact support.';
+       } else if (error.response?.status === 404) {
+         errorMessage = 'Music file not found. Please contact support.';
+       } else if (error.response?.status >= 500) {
+         errorMessage = 'Server error. Please try again later.';
+       } else if (error.message) {
+         errorMessage = error.message;
+       }
+      
+      setDownloadError(errorMessage);
+      setDownloadStates(prev => ({ ...prev, [musicId]: 'error' }));
+      
+      // Reset error state after 3 seconds
+      setTimeout(() => {
+        setDownloadStates(prev => ({ ...prev, [musicId]: null }));
+      }, 3000);
     }
   };
 
@@ -152,6 +250,32 @@ export default function MusicList({ musics, userLoggedIn }) {
           </div>
         </div>
       )}
+
+             {/* Error message for downloads */}
+       {downloadError && (
+         <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+           <div className="flex items-center justify-between">
+             <div className="flex items-center">
+               <FaDownload className="text-red-400 mr-2" />
+               <div>
+                 <p className="text-red-800 font-medium">{downloadError}</p>
+                 {downloadError.includes('400') || downloadError.includes('Invalid request') && (
+                   <p className="text-red-600 text-sm mt-1">
+                     This might be a temporary issue. Please try again or contact support if the problem persists.
+                   </p>
+                 )}
+               </div>
+             </div>
+             <button
+               onClick={() => setDownloadError(null)}
+               className="text-red-400 hover:text-red-600 text-lg font-bold"
+               title="Dismiss error"
+             >
+               ×
+             </button>
+           </div>
+         </div>
+       )}
 
       {/* Search and Filter Controls */}
       <div className="bg-white rounded-lg shadow p-6 mb-6">
@@ -339,12 +463,35 @@ export default function MusicList({ musics, userLoggedIn }) {
                     {audioUrl && (
                       <button 
                         onClick={() => handleDownload(music)}
-                        className="p-2 text-gray-400 hover:text-purple-500 transition-colors"
-                        title="Download music"
+                        disabled={!isAuthenticated || downloadStates[music.id] === 'downloading'}
+                        className={`p-2 transition-colors ${
+                          !isAuthenticated 
+                            ? 'text-gray-300 cursor-not-allowed'
+                            : downloadStates[music.id] === 'downloading'
+                            ? 'text-blue-500 cursor-wait'
+                            : downloadStates[music.id] === 'success'
+                            ? 'text-green-500'
+                            : downloadStates[music.id] === 'error'
+                            ? 'text-red-500'
+                            : 'text-gray-400 hover:text-purple-500'
+                        }`}
+                        title={
+                          !isAuthenticated 
+                            ? 'Login to download music'
+                            : downloadStates[music.id] === 'downloading'
+                            ? 'Downloading...'
+                            : 'Download music'
+                        }
                       >
-                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
-                        </svg>
+                        {downloadStates[music.id] === 'downloading' ? (
+                          <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                        ) : downloadStates[music.id] === 'success' ? (
+                          <FaDownload size={16} />
+                        ) : downloadStates[music.id] === 'error' ? (
+                          <FaDownload size={16} />
+                        ) : (
+                          <FaDownload size={16} />
+                        )}
                       </button>
                     )}
                   </div>
