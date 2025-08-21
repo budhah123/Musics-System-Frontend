@@ -164,33 +164,33 @@ export default function UsersManagement() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600"></div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-300"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Users Management</h1>
-          <p className="text-gray-600">Manage system users and their permissions</p>
+          <h1 className="text-3xl font-bold text-white">Users Management</h1>
+          <p className="text-indigo-200">Manage system users and their permissions</p>
         </div>
 
         {/* Search and Actions */}
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
+        <div className="glass rounded-lg shadow p-6 mb-6">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1">
               <div className="relative">
-                <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-indigo-300" />
                 <input
                   type="text"
                   placeholder="Search users by name or email..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full pl-10 pr-4 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-indigo-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 />
               </div>
             </div>
@@ -203,7 +203,7 @@ export default function UsersManagement() {
             </button>
             <button 
               onClick={loadUsers}
-              className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+              className="inline-flex items-center px-4 py-2 border border-white/30 text-sm font-medium rounded-md text-white bg-white/10 hover:bg-white/20"
             >
               <FaSearch className="mr-2 h-4 w-4" />
               Refresh
@@ -213,82 +213,82 @@ export default function UsersManagement() {
 
         {/* Error Display */}
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+          <div className="glass border border-red-500/30 text-red-300 px-4 py-3 rounded mb-6">
             {error}
           </div>
         )}
 
         {/* Create User Form */}
         {showCreateForm && (
-          <div className="bg-white rounded-lg shadow p-6 mb-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Create New User</h3>
+          <div className="glass rounded-lg shadow p-6 mb-6">
+            <h3 className="text-lg font-medium text-white mb-4">Create New User</h3>
             <form onSubmit={handleCreateUser} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-white mb-1">
                     Full Name *
                   </label>
                   <input
                     type="text"
                     value={createForm.fullname}
                     onChange={(e) => handleCreateFormChange('fullname', e.target.value)}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    className="w-full bg-white/20 backdrop-blur-sm border border-white/30 rounded-md px-3 py-2 text-white placeholder-indigo-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                     placeholder="Enter full name"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-white mb-1">
                     Email *
                   </label>
                   <input
                     type="email"
                     value={createForm.email}
                     onChange={(e) => handleCreateFormChange('email', e.target.value)}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    className="w-full bg-white/20 backdrop-blur-sm border border-white/30 rounded-md px-3 py-2 text-white placeholder-indigo-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                     placeholder="Enter email address"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-white mb-1">
                     Password *
                   </label>
                   <input
                     type="password"
                     value={createForm.password}
                     onChange={(e) => handleCreateFormChange('password', e.target.value)}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    className="w-full bg-white/20 backdrop-blur-sm border border-white/30 rounded-md px-3 py-2 text-white placeholder-indigo-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                     placeholder="Enter password"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-white mb-1">
                     Role
                   </label>
                   <select
                     value={createForm.role}
                     onChange={(e) => handleCreateFormChange('role', e.target.value)}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    className="w-full bg-white/20 backdrop-blur-sm border border-white/30 rounded-md px-3 py-2 text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   >
-                    <option value="user">User</option>
-                    <option value="admin">Admin</option>
-                    <option value="moderator">Moderator</option>
+                    <option value="user" className="bg-indigo-900 text-white">User</option>
+                    <option value="admin" className="bg-indigo-900 text-white">Admin</option>
+                    <option value="moderator" className="bg-indigo-900 text-white">Moderator</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-white mb-1">
                     Status
                   </label>
                   <select
                     value={createForm.status}
                     onChange={(e) => handleCreateFormChange('status', e.target.value)}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    className="w-full bg-white/20 backdrop-blur-sm border border-white/30 rounded-md px-3 py-2 text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   >
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                    <option value="suspended">Suspended</option>
+                    <option value="active" className="bg-indigo-900 text-white">Active</option>
+                    <option value="inactive" className="bg-indigo-900 text-white">Inactive</option>
+                    <option value="suspended" className="bg-indigo-900 text-white">Suspended</option>
                   </select>
                 </div>
               </div>
@@ -307,7 +307,7 @@ export default function UsersManagement() {
                 <button
                   type="button"
                   onClick={resetCreateForm}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md"
+                  className="px-4 py-2 text-sm font-medium text-white bg-white/20 hover:bg-white/30 rounded-md"
                 >
                   Cancel
                 </button>
@@ -317,28 +317,28 @@ export default function UsersManagement() {
         )}
 
         {/* Users Table */}
-        <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="glass rounded-lg shadow overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-white/20">
+              <thead className="bg-white/10">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-indigo-200 uppercase tracking-wider">
                     User
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-indigo-200 uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-indigo-200 uppercase tracking-wider">
                     Role
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-indigo-200 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="divide-y divide-white/20">
                 {filteredUsers.map(user => (
-                  <tr key={user.id} className="hover:bg-gray-50">
+                  <tr key={user.id} className="hover:bg-white/10">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10">
@@ -349,26 +349,26 @@ export default function UsersManagement() {
                           </div>
                         </div>
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">
+                          <div className="text-sm font-medium text-white">
                             {editingUser?.id === user.id ? (
                               <input
                                 type="text"
                                 value={editingUser.name || ''}
                                 onChange={(e) => setEditingUser({...editingUser, name: e.target.value})}
-                                className="border border-gray-300 rounded px-2 py-1 text-sm"
+                                className="border border-white/30 rounded px-2 py-1 text-sm bg-white/20 text-white"
                                 placeholder="Enter user name"
                               />
                             ) : (
                               user.name !== 'Unnamed User' ? user.name : 'User ' + user.id.substring(0, 6)
                             )}
                           </div>
-                          <div className="text-sm text-gray-500">
+                          <div className="text-sm text-indigo-200">
                             {editingUser?.id === user.id ? (
                               <input
                                 type="email"
                                 value={editingUser.email || ''}
                                 onChange={(e) => setEditingUser({...editingUser, email: e.target.value})}
-                                className="border border-gray-300 rounded px-2 py-1 text-sm"
+                                className="border border-white/30 rounded px-2 py-1 text-sm bg-white/20 text-white"
                                 placeholder="Enter email"
                               />
                             ) : (
@@ -383,11 +383,11 @@ export default function UsersManagement() {
                         <select
                           value={editingUser.status || 'active'}
                           onChange={(e) => setEditingUser({...editingUser, status: e.target.value})}
-                          className="border border-gray-300 rounded px-2 py-1 text-sm"
+                          className="border border-white/30 rounded px-2 py-1 text-sm bg-white/20 text-white"
                         >
-                          <option value="active">Active</option>
-                          <option value="inactive">Inactive</option>
-                          <option value="suspended">Suspended</option>
+                          <option value="active" className="bg-indigo-900 text-white">Active</option>
+                          <option value="inactive" className="bg-indigo-900 text-white">Inactive</option>
+                          <option value="suspended" className="bg-indigo-900 text-white">Suspended</option>
                         </select>
                       ) : (
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
@@ -399,16 +399,16 @@ export default function UsersManagement() {
                         </span>
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-indigo-200">
                       {editingUser?.id === user.id ? (
                         <select
                           value={editingUser.role || 'user'}
                           onChange={(e) => setEditingUser({...editingUser, role: e.target.value})}
-                          className="border border-gray-300 rounded px-2 py-1 text-sm"
+                          className="border border-white/30 rounded px-2 py-1 text-sm bg-white/20 text-white"
                         >
-                          <option value="user">User</option>
-                          <option value="admin">Admin</option>
-                          <option value="moderator">Moderator</option>
+                          <option value="user" className="bg-indigo-900 text-white">User</option>
+                          <option value="admin" className="bg-indigo-900 text-white">Admin</option>
+                          <option value="moderator" className="bg-indigo-900 text-white">Moderator</option>
                         </select>
                       ) : (
                         user.role || 'user'
@@ -419,13 +419,13 @@ export default function UsersManagement() {
                         <div className="flex space-x-2">
                           <button
                             onClick={handleSaveEdit}
-                            className="text-green-600 hover:text-green-900"
+                            className="text-green-400 hover:text-green-300"
                           >
                             Save
                           </button>
                           <button
                             onClick={handleCancelEdit}
-                            className="text-gray-600 hover:text-gray-900"
+                            className="text-indigo-300 hover:text-indigo-200"
                           >
                             Cancel
                           </button>
@@ -434,7 +434,7 @@ export default function UsersManagement() {
                         <div className="flex space-x-2">
                           <button
                             onClick={() => handleEdit(user)}
-                            className="text-indigo-600 hover:text-indigo-900"
+                            className="text-indigo-400 hover:text-indigo-300"
                           >
                             <FaEdit className="h-4 w-4" />
                           </button>
@@ -444,7 +444,7 @@ export default function UsersManagement() {
                             className={`${
                               deletingUserId === user.id
                                 ? 'text-gray-400 cursor-not-allowed'
-                                : 'text-red-600 hover:text-red-900'
+                                : 'text-red-400 hover:text-red-300'
                             }`}
                           >
                             <FaTrash className="h-4 w-4" />
@@ -462,11 +462,11 @@ export default function UsersManagement() {
             <div className="text-center py-12">
               {users.length === 0 ? (
                 <div>
-                  <p className="text-gray-500 mb-2">No users found in the system.</p>
-                  <p className="text-sm text-gray-400">Users will appear here once they register.</p>
+                  <p className="text-indigo-200 mb-2">No users found in the system.</p>
+                  <p className="text-sm text-indigo-300">Users will appear here once they register.</p>
                 </div>
               ) : (
-                <p className="text-gray-500">No users found matching your search criteria.</p>
+                <p className="text-indigo-200">No users found matching your search criteria.</p>
               )}
             </div>
           )}
@@ -474,14 +474,14 @@ export default function UsersManagement() {
 
         {/* Pagination */}
         <div className="mt-6 flex items-center justify-between">
-          <div className="text-sm text-gray-700">
+          <div className="text-sm text-indigo-200">
             Showing {filteredUsers.length} of {users.length} users
           </div>
           <div className="flex space-x-2">
-            <button className="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+            <button className="px-3 py-2 border border-white/30 rounded-md text-sm font-medium text-white bg-white/10 hover:bg-white/20">
               Previous
             </button>
-            <button className="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+            <button className="px-3 py-2 border border-white/30 rounded-md text-sm font-medium text-white bg-white/10 hover:bg-white/20">
               Next
             </button>
           </div>

@@ -139,7 +139,7 @@ export default function MusicGrid({ sectionType = 'trending', onMusicCardClick }
                 {/* Play Button Overlay */}
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
                   <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/30 group-hover:scale-110 transition-transform duration-300">
-                    <FaPlay className="text-white text-lg ml-1" />
+                    <FaPlay size={20} className="text-white text-lg ml-1" />
                   </div>
                 </div>
               </div>
@@ -156,7 +156,7 @@ export default function MusicGrid({ sectionType = 'trending', onMusicCardClick }
               
               {/* Artist */}
               <div className="flex items-center space-x-2 text-indigo-200 text-xs">
-                <FaUser className="text-indigo-400 flex-shrink-0" />
+                <FaUser size={16} className="text-indigo-400 flex-shrink-0" />
                 <span className="line-clamp-1 font-medium">
                   {music.artist || 'Unknown Artist'}
                 </span>
@@ -164,7 +164,7 @@ export default function MusicGrid({ sectionType = 'trending', onMusicCardClick }
               
               {/* Duration */}
               <div className="flex items-center space-x-2 text-indigo-200 text-xs">
-                <FaClock className="text-indigo-400 flex-shrink-0" />
+                <FaClock size={16} className="text-indigo-400 flex-shrink-0" />
                 <span className="font-medium">{formatDuration(music.duration)}</span>
               </div>
             </div>

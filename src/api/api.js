@@ -1,5 +1,55 @@
 const API_BASE = 'https://musics-system-2.onrender.com'; 
 
+// ===== CACHING SYSTEM =====
+const cache = {
+  musics: {
+    data: null,
+    timestamp: null,
+    ttl: 5 * 60 * 1000 // 5 minutes cache
+  },
+  users: {
+    data: null,
+    timestamp: null,
+    ttl: 10 * 60 * 1000 // 10 minutes cache
+  }
+};
+
+// Cache management functions
+const isCacheValid = (cacheKey) => {
+  const cacheItem = cache[cacheKey];
+  if (!cacheItem || !cacheItem.data || !cacheItem.timestamp) {
+    return false;
+  }
+  return (Date.now() - cacheItem.timestamp) < cacheItem.ttl;
+};
+
+const setCache = (cacheKey, data) => {
+  cache[cacheKey] = {
+    data,
+    timestamp: Date.now(),
+    ttl: cache[cacheKey]?.ttl || 5 * 60 * 1000
+  };
+};
+
+const getCache = (cacheKey) => {
+  return cache[cacheKey]?.data || null;
+};
+
+const clearCache = (cacheKey) => {
+  if (cacheKey) {
+    cache[cacheKey] = { data: null, timestamp: null, ttl: cache[cacheKey]?.ttl };
+  } else {
+    Object.keys(cache).forEach(key => {
+      cache[key] = { data: null, timestamp: null, ttl: cache[key]?.ttl };
+    });
+  }
+};
+
+// Export cache management functions
+export { clearCache, setCache, getCache, isCacheValid };
+
+// ===== OPTIMIZED API FUNCTIONS =====
+
 // Health check function to test backend connectivity
 export async function checkBackendHealth() {
   try {
@@ -284,9 +334,59 @@ export async function loginUser(email, password) {
   }
 }
 
-// Fetch all musics from Firestore
-export async function fetchMusics() {
+// ===== OPTIMIZED MUSIC FUNCTIONS =====
+
+// Normalize music data to ensure consistent field names
+const normalizeMusicData = (musicData) => {
+  if (!Array.isArray(musicData)) return musicData;
+  
+  console.log('Raw API response data:', musicData);
+  
+  const normalizedData = musicData.map(music => {
+    const normalized = {
+      ...music,
+      // Normalize thumbnail fields
+      thumbnailUrl: music.thumbnailUrl || music.thumbnail || music.thumbnailFile || music.imageUrl || music.image || null,
+      // Normalize audio fields
+      audioUrl: music.audioUrl || music.musicUrl || music.musicFile || music.audio || music.file || music.url || null,
+      // Normalize other fields
+      title: music.title || music.name || 'Untitled Track',
+      artist: music.artist || music.artistName || 'Unknown Artist',
+      genre: music.genre || music.category || 'Unknown Genre',
+      duration: music.duration || music.length || music.durationInSeconds || null
+    };
+    
+    console.log('Normalized music item:', {
+      id: normalized.id,
+      title: normalized.title,
+      thumbnailUrl: normalized.thumbnailUrl,
+      originalThumbnailFields: {
+        thumbnailUrl: music.thumbnailUrl,
+        thumbnail: music.thumbnail,
+        thumbnailFile: music.thumbnailFile,
+        imageUrl: music.imageUrl,
+        image: music.image
+      }
+    });
+    
+    return normalized;
+  });
+  
+  console.log('Final normalized data:', normalizedData);
+  return normalizedData;
+};
+
+// Fetch all musics from Firestore with caching
+export async function fetchMusics(useCache = true) {
   try {
+    // Check cache first if enabled
+    if (useCache && isCacheValid('musics')) {
+      console.log('API: Returning cached musics data');
+      const cachedData = getCache('musics');
+      return normalizeMusicData(cachedData);
+    }
+
+    console.log('API: Fetching fresh musics data');
     const res = await fetch(`${API_BASE}/musics`, {
       method: 'GET',
       headers: {
@@ -302,13 +402,52 @@ export async function fetchMusics() {
     }
 
     const data = await res.json();
-    return data;
+    
+    // Normalize the data before caching
+    const normalizedData = normalizeMusicData(data);
+    
+    // Cache the normalized data
+    if (useCache) {
+      setCache('musics', normalizedData);
+      console.log('API: Cached normalized musics data');
+    }
+    
+    return normalizedData;
   } catch (error) {
     throw new Error(error.message || 'Network error');
   }
 }
 
-
+// Fetch musics for specific sections (optimized)
+export async function fetchMusicsForSections(sections = ['trending', 'forYou', 'others']) {
+  try {
+    // Fetch all musics once and distribute to sections
+    const allMusics = await fetchMusics(true); // Use cache
+    
+    const sectionData = {};
+    const totalMusics = allMusics.length;
+    
+    sections.forEach((section, index) => {
+      switch (section) {
+        case 'trending':
+          sectionData[section] = allMusics.slice(0, Math.min(6, totalMusics));
+          break;
+        case 'forYou':
+          sectionData[section] = allMusics.slice(6, Math.min(12, totalMusics));
+          break;
+        case 'others':
+          sectionData[section] = allMusics.slice(12);
+          break;
+        default:
+          sectionData[section] = allMusics.slice(index * 6, (index + 1) * 6);
+      }
+    });
+    
+    return sectionData;
+  } catch (error) {
+    throw new Error(error.message || 'Failed to fetch section musics');
+  }
+}
 
 // Create a new music entry
 export async function createMusic(token, { musicFile, thumbnailFile, title, artist, genre, duration }) {
@@ -335,6 +474,9 @@ export async function createMusic(token, { musicFile, thumbnailFile, title, arti
       throw new Error(data.message || 'Failed to create music');
     }
 
+    // Clear musics cache after creating new music
+    clearCache('musics');
+    
     return data;
   } catch (error) {
     throw new Error(error.message || 'Network error');
@@ -359,6 +501,9 @@ export async function updateMusic(token, id, musicData) {
       throw new Error(data.message || 'Failed to update music');
     }
 
+    // Clear musics cache after updating
+    clearCache('musics');
+    
     return data;
   } catch (error) {
     throw new Error(error.message || 'Network error');
@@ -407,17 +552,27 @@ export async function deleteMusic(token, id) {
       data = { success: true };
     }
 
+    // Clear musics cache after deleting
+    clearCache('musics');
+    
     return data;
   } catch (error) {
     throw new Error(error.message || 'Failed to delete music');
   }
 }
 
-// ===== USER MANAGEMENT API FUNCTIONS =====
+// ===== OPTIMIZED USER MANAGEMENT API FUNCTIONS =====
 
-// Fetch all users (Admin only)
-export async function fetchUsers(token = null) {
+// Fetch all users (Admin only) with caching
+export async function fetchUsers(token = null, useCache = true) {
   try {
+    // Check cache first if enabled
+    if (useCache && isCacheValid('users')) {
+      console.log('API: Returning cached users data');
+      return getCache('users');
+    }
+
+    console.log('API: Fetching fresh users data');
     const headers = {};
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
@@ -436,6 +591,13 @@ export async function fetchUsers(token = null) {
     }
 
     const data = await res.json();
+    
+    // Cache the fresh data
+    if (useCache) {
+      setCache('users', data);
+      console.log('API: Cached fresh users data');
+    }
+    
     return data;
   } catch (error) {
     throw new Error(error.message || 'Network error');
@@ -460,6 +622,9 @@ export async function updateUser(token, id, userData) {
       throw new Error(data.message || 'Failed to update user');
     }
 
+    // Clear users cache after updating
+    clearCache('users');
+    
     return data;
   } catch (error) {
     throw new Error(error.message || 'Network error');
@@ -503,6 +668,9 @@ export async function deleteUser(token, id) {
       data = { success: true };
     }
 
+    // Clear users cache after deleting
+    clearCache('users');
+    
     return data;
   } catch (error) {
     throw new Error(error.message || 'Failed to delete user');

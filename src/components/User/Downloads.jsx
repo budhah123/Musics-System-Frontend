@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaDownload, FaMusic, FaExclamationTriangle, FaSpinner, FaPlay, FaPause, FaVolumeUp, FaVolumeMute, FaHeart, FaShare } from 'react-icons/fa';
+import { FaDownload, FaMusic, FaExclamationTriangle, FaSpinner, FaPlay, FaPause, FaVolumeUp, FaVolumeMute, FaHeart, FaShare, FaClock, FaUser } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
 import { useDownloads } from '../../context/DownloadsContext';
 import axios from 'axios';
@@ -43,24 +43,84 @@ export default function Downloads() {
     }
   }, [downloads]);
 
+  // Cleanup audio elements when component unmounts or downloads change
+  useEffect(() => {
+    return () => {
+      // Pause all audio elements and clean up
+      Object.keys(audioRefs.current).forEach(id => {
+        if (audioRefs.current[id]) {
+          audioRefs.current[id].pause();
+          audioRefs.current[id].src = '';
+        }
+      });
+      setCurrentlyPlaying(null);
+    };
+  }, [downloads]);
+
+  // Final cleanup when component unmounts
+  useEffect(() => {
+    return () => {
+      // Ensure all audio is stopped when component unmounts
+      Object.keys(audioRefs.current).forEach(id => {
+        if (audioRefs.current[id]) {
+          const audio = audioRefs.current[id];
+          // Remove event listeners to prevent memory leaks
+          audio.removeEventListener('play', () => {});
+          audio.removeEventListener('pause', () => {});
+          audio.pause();
+          audio.src = '';
+          audio.load();
+        }
+      });
+      audioRefs.current = {};
+      setCurrentlyPlaying(null);
+    };
+  }, []);
+
+  // Helper function to pause all other audio elements
+  const pauseAllOtherAudio = (excludeMusicId) => {
+    Object.keys(audioRefs.current).forEach(id => {
+      if (id !== excludeMusicId && audioRefs.current[id]) {
+        const otherAudio = audioRefs.current[id];
+        if (!otherAudio.paused) {
+          otherAudio.pause();
+          // Update the audio state to reflect that it's no longer playing
+          setAudioStates(prev => ({
+            ...prev,
+            [id]: { ...prev[id], isPlaying: false }
+          }));
+        }
+      }
+    });
+    
+    // Also update the currentlyPlaying state if it was one of the paused audios
+    if (currentlyPlaying && currentlyPlaying !== excludeMusicId) {
+      setCurrentlyPlaying(null);
+    }
+  };
+
+  // Helper function to reset all audio states
+  const resetAllAudioStates = () => {
+    setCurrentlyPlaying(null);
+    setAudioStates(prev => {
+      const newStates = {};
+      Object.keys(prev).forEach(id => {
+        newStates[id] = { ...prev[id], isPlaying: false, currentTime: 0 };
+      });
+      return newStates;
+    });
+  };
+
   // Handle audio play/pause
   const handlePlayPause = (musicId) => {
     const audio = audioRefs.current[musicId];
     if (!audio) return;
 
-    if (currentlyPlaying && currentlyPlaying !== musicId) {
-      // Pause currently playing audio
-      const currentAudio = audioRefs.current[currentlyPlaying];
-      if (currentAudio) {
-        currentAudio.pause();
-        setAudioStates(prev => ({
-          ...prev,
-          [currentlyPlaying]: { ...prev[currentlyPlaying], isPlaying: false }
-        }));
-      }
-    }
+    // First, pause all other audio elements
+    pauseAllOtherAudio(musicId);
 
     if (audioStates[musicId]?.isPlaying) {
+      // Pause current audio
       audio.pause();
       setCurrentlyPlaying(null);
       setAudioStates(prev => ({
@@ -68,12 +128,28 @@ export default function Downloads() {
         [musicId]: { ...prev[musicId], isPlaying: false }
       }));
     } else {
-      audio.play();
-      setCurrentlyPlaying(musicId);
+      // Play selected audio
+      // Ensure the audio is properly loaded before playing
+      if (audio.readyState < 2) { // HAVE_CURRENT_DATA
+        audio.load();
+      }
+      
+      // Set the playing state before attempting to play
       setAudioStates(prev => ({
         ...prev,
         [musicId]: { ...prev[musicId], isPlaying: true }
       }));
+      
+      audio.play().then(() => {
+        setCurrentlyPlaying(musicId);
+      }).catch((error) => {
+        console.error('Failed to play audio:', error);
+        setAudioStates(prev => ({
+          ...prev,
+          [musicId]: { ...prev[musicId], isPlaying: false }
+        }));
+        setCurrentlyPlaying(null);
+      });
     }
   };
 
@@ -109,7 +185,7 @@ export default function Downloads() {
     const audio = audioRefs.current[musicId];
     if (audio) {
       audio.volume = newVolume;
-      setAudioStates(prev => ({
+      setAudioStates(prev => ({ 
         ...prev,
         [musicId]: { ...prev[musicId], volume: newVolume }
       }));
@@ -136,6 +212,13 @@ export default function Downloads() {
       ...prev,
       [musicId]: { ...prev[musicId], isPlaying: false, currentTime: 0 }
     }));
+    
+    // Also pause the audio element to ensure it's completely stopped
+    const audio = audioRefs.current[musicId];
+    if (audio) {
+      audio.pause();
+      audio.currentTime = 0;
+    }
   };
 
   // Format time for display
@@ -145,17 +228,6 @@ export default function Downloads() {
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
-
-  // No need to fetch music details separately - backend provides them
-  // useEffect(() => {
-  //   if (downloads.length > 0) {
-  //     downloads.forEach(download => {
-  //       if (!musicDetails[download.musicId] && !loadingDetails[download.musicId]) {
-  //         fetchMusicDetails(download.musicId);
-  //       }
-  //     });
-  //   }
-  // }, [downloads, musicDetails, loadingDetails]);
 
   const fetchDownloads = async () => {
     try {
@@ -186,21 +258,21 @@ export default function Downloads() {
       // Ensure data is an array and has the expected structure
       const downloadsArray = Array.isArray(data) ? data : [];
       
-             // Log each download record to debug the structure
-       downloadsArray.forEach((download, index) => {
-         console.log(`Download ${index}:`, download);
-         console.log(`Music ID: ${download.musicId}, User ID: ${download.userId}`);
-       });
+      // Log each download record to debug the structure
+      downloadsArray.forEach((download, index) => {
+        console.log(`Download ${index}:`, download);
+        console.log(`Music ID: ${download.musicId}, User ID: ${download.userId}`);
+      });
       
       setDownloadsData(downloadsArray);
       
-             // Backend already provides music details, no need to fetch separately
-       // Log the structure to verify what we're getting
-       if (downloadsArray.length > 0) {
-         downloadsArray.forEach((download, index) => {
-           console.log(`Download ${index} full data:`, download);
-         });
-       }
+      // Backend already provides music details, no need to fetch separately
+      // Log the structure to verify what we're getting
+      if (downloadsArray.length > 0) {
+        downloadsArray.forEach((download, index) => {
+          console.log(`Download ${index} full data:`, download);
+        });
+      }
     } catch (error) {
       console.error('Error fetching downloads:', error);
       
@@ -220,8 +292,6 @@ export default function Downloads() {
       setLoadingState(false);
     }
   };
-
-
 
   const handleDownloadAgain = async (musicId, musicUrl) => {
     if (!musicUrl) {
@@ -307,27 +377,22 @@ export default function Downloads() {
     }
   };
 
-
-
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12">
+      <div className="min-h-screen py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">My Downloads</h1>
-            <p className="text-gray-600">Track your music download history</p>
-          </div>
-          
-          <div className="text-center py-12">
-            <FaMusic className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-            <h2 className="text-xl font-bold text-gray-900 mb-2">Authentication Required</h2>
-            <p className="text-gray-600 mb-4">Please login to view your downloads</p>
-            <a
-              href="/user/login"
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 transition-colors"
-            >
-              Login
-            </a>
+          <div className="text-center py-16">
+            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 max-w-md mx-auto border border-white/20">
+              <FaExclamationTriangle className="w-16 h-16 text-red-400 mx-auto mb-4" />
+              <h3 className="text-red-300 text-lg mb-2">Authentication Required</h3>
+              <p className="text-red-200 mb-6">Please login to view your downloads</p>
+              <a
+                href="/user/login"
+                className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl font-medium transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl inline-block"
+              >
+                Login
+              </a>
+            </div>
           </div>
         </div>
       </div>
@@ -336,36 +401,14 @@ export default function Downloads() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12">
+      <div className="min-h-screen py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-8 flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">My Downloads</h1>
-              <p className="text-gray-600">Track your music download history</p>
+          <div className="text-center py-16 animate-fade-in">
+            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 max-w-md mx-auto border border-white/20">
+              <FaSpinner className="w-16 h-16 text-indigo-300 mx-auto mb-4 animate-spin" />
+              <h3 className="text-indigo-200 text-lg mb-2">Loading Your Downloads</h3>
+              <p className="text-indigo-300">Please wait while we fetch your download history...</p>
             </div>
-            <div className="w-24 h-10 bg-gray-200 rounded animate-pulse"></div>
-          </div>
-          
-          {/* Skeleton loader for downloads */}
-          <div className="bg-white shadow overflow-hidden sm:rounded-md">
-            <ul className="divide-y divide-gray-200">
-              {[1, 2, 3].map((i) => (
-                <li key={i}>
-                  <div className="px-4 py-4 sm:px-6">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <div className="w-8 h-8 bg-gray-200 rounded animate-pulse"></div>
-                        <div className="ml-4">
-                          <div className="bg-gray-200 h-4 w-32 rounded animate-pulse mb-2"></div>
-                          <div className="bg-gray-200 h-3 w-24 rounded animate-pulse"></div>
-                        </div>
-                      </div>
-                      <div className="w-24 h-8 bg-gray-200 rounded animate-pulse"></div>
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </ul>
           </div>
         </div>
       </div>
@@ -374,30 +417,27 @@ export default function Downloads() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12">
+      <div className="min-h-screen py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">My Downloads</h1>
-            <p className="text-gray-600">Track your music download history</p>
-          </div>
-          
-          <div className="text-center py-12">
-            <FaExclamationTriangle className="mx-auto h-12 w-12 text-red-500 mb-4" />
-            <h2 className="text-xl font-bold text-gray-900 mb-2">Error Loading Downloads</h2>
-            <p className="text-red-600 mb-4">{error}</p>
-            <div className="space-x-4">
-              <button
-                onClick={fetchDownloads}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Try Again
-              </button>
-              <a
-                href="/user/musics"
-                className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors"
-              >
-                Browse Music
-              </a>
+          <div className="text-center py-16 animate-fade-in">
+            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 max-w-md mx-auto border border-white/20">
+              <FaExclamationTriangle className="w-16 h-16 text-red-400 mx-auto mb-4" />
+              <h3 className="text-red-300 text-lg mb-2">Error Loading Downloads</h3>
+              <p className="text-red-200 mb-6">{error}</p>
+              <div className="space-x-4">
+                <button
+                  onClick={fetchDownloads}
+                  className="bg-blue-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-blue-700 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
+                >
+                  Try Again
+                </button>
+                <a
+                  href="/user/musics"
+                  className="inline-block bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-xl font-medium transition-all duration-300 hover:scale-105 border border-white/30"
+                >
+                  Browse Music
+                </a>
+              </div>
             </div>
           </div>
         </div>
@@ -406,192 +446,277 @@ export default function Downloads() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-screen py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-8 flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">My Downloads</h1>
-            <p className="text-gray-600">Track your music download history and play your downloaded tracks</p>
+        {/* Header Section - Same styling as landing page */}
+        <div className="text-center mb-20 animate-fade-in">
+          <div className="inline-flex items-center justify-center w-24 h-24 bg-green-600 rounded-full mb-6 animate-float">
+            <FaDownload className="text-4xl text-white" />
           </div>
-          <button
-            onClick={fetchDownloads}
-            disabled={loading}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-          >
-            {loading ? (
-              <>
-                <FaSpinner className="h-4 w-4 mr-2 animate-spin" />
-                Refreshing...
-              </>
-            ) : (
-              <>
-                <FaDownload className="h-4 w-4 mr-2" />
-                Refresh
-              </>
-            )}
-          </button>
+          <h1 className="text-5xl font-bold text-white mb-6 drop-shadow-2xl">
+            My Downloads
+          </h1>
+          <p className="text-xl text-indigo-200 max-w-2xl mx-auto drop-shadow-lg">
+            Track your music download history and play your downloaded tracks
+          </p>
+        </div>
+
+        {/* Stats Section */}
+        <div className="mb-12 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+          <div className="glass rounded-2xl p-8 shadow-lg border border-white/20">
+            <h3 className="text-2xl font-bold text-white mb-6 text-center">Download Overview</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+                <div className="text-4xl font-bold text-green-300 mb-2">{downloads.length}</div>
+                <div className="text-indigo-200 font-medium">Total Downloads</div>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+                <div className="text-4xl font-bold text-indigo-300 mb-2">
+                  {downloads.filter(d => d.genre).length}
+                </div>
+                <div className="text-indigo-200 font-medium">Genres</div>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+                <div className="text-4xl font-bold text-purple-300 mb-2">
+                  {downloads.filter(d => d.artist).length}
+                </div>
+                <div className="text-indigo-200 font-medium">Artists</div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Downloads List */}
         {downloads.length === 0 ? (
-          <div className="text-center py-12">
-            <FaDownload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No downloads yet</h3>
-            <p className="text-gray-500 mb-4">Start building your music library by downloading some tracks.</p>
-            <div className="space-x-4">
-              <a
-                href="/user/musics"
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 transition-colors"
-              >
-                Browse Music
-              </a>
-              <button
-                onClick={fetchDownloads}
-                className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors"
-              >
-                <FaDownload className="h-4 w-4 mr-2" />
-                Refresh
-              </button>
+          <div className="animate-fade-in" style={{ animationDelay: '0.4s' }}>
+            <div className="text-center py-16">
+              <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 max-w-md mx-auto border border-white/20">
+                <FaDownload className="w-16 h-16 text-indigo-300 mx-auto mb-4" />
+                <h3 className="text-indigo-200 text-lg mb-2">No downloads yet</h3>
+                <p className="text-indigo-300 mb-6">Start building your music library by downloading some tracks.</p>
+                <div className="space-x-4">
+                  <a
+                    href="/user/musics"
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl font-medium transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl inline-block"
+                  >
+                    Browse Music
+                  </a>
+                  <button
+                    onClick={fetchDownloads}
+                    className="bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-xl font-medium transition-all duration-300 hover:scale-105 border border-white/30 inline-block"
+                  >
+                    <FaDownload className="h-4 w-4 mr-2 inline" />
+                    Refresh
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         ) : (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {downloads.map((download) => {
-              const music = download;
-              const audioState = audioStates[music.musicId] || { isPlaying: false, currentTime: 0, duration: 0, volume: 1, isMuted: false };
-              
-              return (
-                <div key={`${download.userId}-${download.musicId}-${download.downloadedAt}`} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-                                     {/* Music Info Header */}
-                   <div className="p-4 border-b border-gray-100">
-                     <div className="flex items-center mb-3">
-                       <div className="flex-shrink-0">
-                         {music?.thumbnail ? (
-                           <img
-                             src={music.thumbnail}
-                             alt={music.title || 'Music thumbnail'}
-                             className="w-20 h-20 rounded-lg object-cover"
-                             onError={(e) => {
-                               e.target.src = '/default-thumbnail.svg';
-                               e.target.onerror = null;
-                             }}
-                           />
-                         ) : (
-                           <FaMusic className="h-20 w-20 text-indigo-500" />
-                         )}
-                       </div>
-                       <div className="ml-4 flex-1 min-w-0">
-                         <h3 className="text-base font-semibold text-gray-900 truncate">
-                           {music?.title || `Music ID: ${download.musicId}`}
-                         </h3>
-                         <p className="text-sm text-gray-500 truncate mb-1">
-                           {music?.artist || 'Unknown Artist'}
-                         </p>
-                         <p className="text-xs text-gray-400 mb-2">
-                           Duration: {formatTime(audioState.duration)}
-                         </p>
-                         
-                         {/* Action Buttons */}
-                         <div className="flex items-center space-x-3">
-                           <button
-                             className="text-gray-400 hover:text-red-500 transition-colors"
-                             title="Add to favorites"
-                           >
-                             <FaHeart className="w-4 h-4" />
-                           </button>
-                           <button
-                             className="text-gray-400 hover:text-blue-500 transition-colors"
-                             title="Share"
-                           >
-                             <FaShare className="w-4 h-4" />
-                           </button>
-                         </div>
-                       </div>
-                     </div>
-                   </div>
-
-                  {/* Audio Player */}
-                  <div className="p-4">
-                    {/* Hidden audio element */}
-                    <audio
-                      ref={(el) => (audioRefs.current[music.musicId] = el)}
-                      src={music?.url}
-                      onTimeUpdate={() => handleTimeUpdate(music.musicId)}
-                      onEnded={() => handleAudioEnded(music.musicId)}
-                      onLoadedMetadata={() => handleTimeUpdate(music.musicId)}
-                      preload="metadata"
-                    />
-
-                    {/* Play/Pause Button */}
-                    <div className="flex justify-center mb-4">
-                      <button
-                        onClick={() => handlePlayPause(music.musicId)}
-                        disabled={!music?.url}
-                        className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
-                          !music?.url
-                            ? 'bg-gray-300 cursor-not-allowed'
-                            : audioState.isPlaying
-                            ? 'bg-red-500 hover:bg-red-600 text-white'
-                            : 'bg-indigo-500 hover:bg-indigo-600 text-white'
-                        }`}
-                      >
-                        {audioState.isPlaying ? <FaPause className="w-5 h-5" /> : <FaPlay className="w-5 h-5 ml-1" />}
-                      </button>
-                    </div>
-
-                    {/* Progress Bar */}
-                    <div className="mb-4">
-                      <div className="flex justify-between text-xs text-gray-500 mb-1">
-                        <span>{formatTime(audioState.currentTime)}</span>
-                        <span>{formatTime(audioState.duration)}</span>
+          <div className="animate-fade-in" style={{ animationDelay: '0.4s' }}>
+            <div className="mb-10 section-header">
+              <h2 className="text-4xl font-bold text-white mb-4 drop-shadow-xl">🎵 Your Downloaded Tracks</h2>
+              <p className="text-lg text-indigo-200">Play, manage, and enjoy your downloaded music</p>
+            </div>
+            
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {downloads.map((download, index) => {
+                const music = download;
+                const audioState = audioStates[music.musicId] || { isPlaying: false, currentTime: 0, duration: 0, volume: 1, isMuted: false };
+                
+                return (
+                  <div 
+                    key={`${download.userId}-${download.musicId}-${download.downloadedAt}`} 
+                    className="group bg-white/10 backdrop-blur-lg rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-105 border border-white/20 hover:border-white/40 animate-fade-in"
+                    style={{ animationDelay: `${index * 0.1}s` }}
+                  >
+                    {/* Music Info Header */}
+                    <div className="p-4 border-b border-white/20">
+                      <div className="flex items-center mb-3">
+                        <div className="flex-shrink-0">
+                          {music?.thumbnail ? (
+                            <img
+                              src={music.thumbnail}
+                              alt={music.title || 'Music thumbnail'}
+                              className="w-20 h-20 rounded-lg object-cover"
+                              onError={(e) => {
+                                e.target.src = '/default-thumbnail.svg';
+                                e.target.onerror = null;
+                              }}
+                            />
+                          ) : (
+                            <FaMusic className="h-20 w-20 text-indigo-400" />
+                          )}
+                        </div>
+                        <div className="ml-4 flex-1 min-w-0">
+                          <h3 className="text-base font-semibold text-white truncate">
+                            {music?.title || `Music ID: ${download.musicId}`}
+                          </h3>
+                          <p className="text-sm text-indigo-200 truncate mb-1">
+                            {music?.artist || 'Unknown Artist'}
+                          </p>
+                          <p className="text-xs text-indigo-300 mb-2">
+                            Duration: {formatTime(audioState.duration)}
+                          </p>
+                          
+                          {/* Action Buttons */}
+                          <div className="flex items-center space-x-3">
+                            <button
+                              className="text-indigo-300 hover:text-red-400 transition-colors"
+                              title="Add to favorites"
+                            >
+                              <FaHeart className="w-4 h-4" />
+                            </button>
+                            <button
+                              className="text-indigo-300 hover:text-blue-400 transition-colors"
+                              title="Share"
+                            >
+                              <FaShare className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
                       </div>
-                      <input
-                        type="range"
-                        min="0"
-                        max={audioState.duration || 0}
-                        value={audioState.currentTime}
-                        onChange={(e) => handleSeek(music.musicId, parseFloat(e.target.value))}
-                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
-                        style={{
-                          background: `linear-gradient(to right, #6366f1 0%, #6366f1 ${(audioState.currentTime / (audioState.duration || 1)) * 100}%, #e5e7eb ${(audioState.currentTime / (audioState.duration || 1)) * 100}%, #e5e7eb 100%)`
+                    </div>
+
+                    {/* Audio Player */}
+                    <div className="p-4">
+                      {/* Hidden audio element */}
+                      <audio
+                        ref={(el) => {
+                          if (el) {
+                            // Clean up any existing audio element
+                            if (audioRefs.current[music.musicId]) {
+                              audioRefs.current[music.musicId].pause();
+                              audioRefs.current[music.musicId].src = '';
+                            }
+                            audioRefs.current[music.musicId] = el;
+                            
+                            // Ensure this audio element is properly initialized
+                            el.volume = audioStates[music.musicId]?.volume || 1;
+                            el.muted = audioStates[music.musicId]?.isMuted || false;
+                            
+                            // Add event listeners to ensure proper state management
+                            el.addEventListener('play', () => {
+                              // Ensure only this audio is playing
+                              pauseAllOtherAudio(music.musicId);
+                              setCurrentlyPlaying(music.musicId);
+                              setAudioStates(prev => ({
+                                ...prev,
+                                [music.musicId]: { ...prev[music.musicId], isPlaying: true }
+                              }));
+                            });
+                            
+                            el.addEventListener('pause', () => {
+                              if (currentlyPlaying === music.musicId) {
+                                setCurrentlyPlaying(null);
+                              }
+                              setAudioStates(prev => ({
+                                ...prev,
+                                [music.musicId]: { ...prev[music.musicId], isPlaying: false }
+                              }));
+                            });
+                          }
                         }}
+                        src={music?.url}
+                        onTimeUpdate={() => handleTimeUpdate(music.musicId)}
+                        onEnded={() => handleAudioEnded(music.musicId)}
+                        onLoadedMetadata={() => handleTimeUpdate(music.musicId)}
+                        preload="metadata"
                       />
+
+                      {/* Play/Pause Button */}
+                      <div className="flex justify-center mb-4">
+                        <button
+                          onClick={() => handlePlayPause(music.musicId)}
+                          disabled={!music?.url}
+                          className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
+                            !music?.url
+                              ? 'bg-gray-300 cursor-not-allowed'
+                              : audioState.isPlaying
+                              ? 'bg-red-500 hover:bg-red-600 text-white'
+                              : 'bg-indigo-500 hover:bg-indigo-600 text-white'
+                          }`}
+                        >
+                          {audioState.isPlaying ? <FaPause className="w-5 h-5" /> : <FaPlay className="w-5 h-5 ml-1" />}
+                        </button>
+                      </div>
+
+                      {/* Progress Bar */}
+                      <div className="mb-4">
+                        <div className="flex justify-between text-xs text-indigo-300 mb-1">
+                          <span>{formatTime(audioState.currentTime)}</span>
+                          <span>{formatTime(audioState.duration)}</span>
+                        </div>
+                        <input
+                          type="range"
+                          min="0"
+                          max={audioState.duration || 0}
+                          value={audioState.currentTime}
+                          onChange={(e) => handleSeek(music.musicId, parseFloat(e.target.value))}
+                          className="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer slider"
+                          style={{
+                            background: `linear-gradient(to right, #6366f1 0%, #6366f1 ${(audioState.currentTime / (audioState.duration || 1)) * 100}%, rgba(255,255,255,0.2) ${(audioState.currentTime / (audioState.duration || 1)) * 100}%, rgba(255,255,255,0.2) 100%)`
+                          }}
+                        />
+                      </div>
+
+                      {/* Volume Controls */}
+                      <div className="flex items-center justify-between">
+                        <button
+                          onClick={() => handleMuteToggle(music.musicId)}
+                          className="text-indigo-300 hover:text-indigo-200 transition-colors"
+                        >
+                          {audioState.isMuted ? <FaVolumeMute className="w-4 h-4" /> : <FaVolumeUp className="w-4 h-4" />}
+                        </button>
+                        <input
+                          type="range"
+                          min="0"
+                          max="1"
+                          step="0.1"
+                          value={audioState.isMuted ? 0 : audioState.volume}
+                          onChange={(e) => handleVolumeChange(music.musicId, parseFloat(e.target.value))}
+                          className="w-20 h-2 bg-white/20 rounded-lg appearance-none cursor-pointer"
+                        />
+                      </div>
+
+                      {/* Download Again Button */}
+                      <div className="mt-4 pt-4 border-t border-white/20">
+                        <button
+                          onClick={() => handleDownloadAgain(music.musicId, music.url)}
+                          disabled={downloadingStates[music.musicId]}
+                          className={`w-full py-2 px-4 rounded-lg font-medium transition-all duration-300 ${
+                            downloadingStates[music.musicId]
+                              ? 'bg-blue-500 text-white cursor-wait'
+                              : 'bg-green-500 hover:bg-green-600 text-white hover:scale-105'
+                          }`}
+                        >
+                          {downloadingStates[music.musicId] ? (
+                            <div className="flex items-center justify-center">
+                              <FaSpinner className="w-4 h-4 mr-2 animate-spin" />
+                              Downloading...
+                            </div>
+                          ) : (
+                            <div className="flex items-center justify-center">
+                              <FaDownload className="w-4 h-4 mr-2" />
+                              Download Again
+                            </div>
+                          )}
+                        </button>
+                      </div>
                     </div>
-
-                    {/* Volume Controls */}
-                    <div className="flex items-center justify-between">
-                      <button
-                        onClick={() => handleMuteToggle(music.musicId)}
-                        className="text-gray-500 hover:text-gray-700 transition-colors"
-                      >
-                        {audioState.isMuted ? <FaVolumeMute className="w-4 h-4" /> : <FaVolumeUp className="w-4 h-4" />}
-                      </button>
-                      <input
-                        type="range"
-                        min="0"
-                        max="1"
-                        step="0.1"
-                        value={audioState.isMuted ? 0 : audioState.volume}
-                        onChange={(e) => handleVolumeChange(music.musicId, parseFloat(e.target.value))}
-                        className="w-20 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                      />
-                    </div>
-
-
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         )}
 
         {/* Download Count and Stats */}
         {downloads.length > 0 && (
-          <div className="mt-8 text-center">
-            <div className="bg-gray-50 rounded-lg p-4 inline-block">
-              <p className="text-sm text-gray-600">
-                Total downloads: <span className="font-semibold text-gray-900">{downloads.length}</span>
+          <div className="mt-8 text-center animate-fade-in" style={{ animationDelay: '0.6s' }}>
+            <div className="glass rounded-lg p-4 inline-block border border-white/20">
+              <p className="text-sm text-indigo-200">
+                Total downloads: <span className="font-semibold text-white">{downloads.length}</span>
               </p>
             </div>
           </div>
@@ -614,7 +739,7 @@ export default function Downloads() {
           .slider::-moz-range-thumb {
             height: 16px;
             width: 16px;
-            border-radius: 50%;
+            border-radius: 0;
             background: #6366f1;
             cursor: pointer;
             border: none;

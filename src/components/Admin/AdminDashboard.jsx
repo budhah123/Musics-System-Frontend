@@ -118,25 +118,25 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-          <p className="text-gray-600">Manage your music system and users</p>
+          <h1 className="text-3xl font-bold text-white">Admin Dashboard</h1>
+          <p className="text-indigo-200">Manage your music system and users</p>
         </div>
 
         {/* Loading State */}
         {loading && (
           <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-            <p className="text-lg text-gray-600">Loading dashboard data...</p>
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-indigo-300 mx-auto mb-4"></div>
+            <p className="text-lg text-indigo-200">Loading dashboard data...</p>
           </div>
         )}
 
         {/* Error State */}
         {error && !loading && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+          <div className="glass border border-red-500/30 text-red-300 px-4 py-3 rounded mb-6">
             <p className="font-medium">Error Loading Dashboard</p>
             <p className="text-sm">{error}</p>
             <button
@@ -153,50 +153,50 @@ export default function AdminDashboard() {
           <>
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="glass rounded-lg shadow p-6">
                 <div className="flex items-center">
                   <div className="p-3 rounded-full bg-blue-100">
                     <FaUsers className="h-6 w-6 text-blue-600" />
                   </div>
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Total Users</p>
-                    <p className="text-2xl font-semibold text-gray-900">{stats.totalUsers}</p>
+                    <p className="text-sm font-medium text-indigo-200">Total Users</p>
+                    <p className="text-2xl font-semibold text-white">{stats.totalUsers}</p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="glass rounded-lg shadow p-6">
                 <div className="flex items-center">
                   <div className="p-3 rounded-full bg-green-100">
                     <FaMusic className="h-6 w-6 text-green-600" />
                   </div>
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Total Music</p>
-                    <p className="text-2xl font-semibold text-gray-900">{stats.totalMusic}</p>
+                    <p className="text-sm font-medium text-indigo-200">Total Music</p>
+                    <p className="text-2xl font-semibold text-white">{stats.totalMusic}</p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="glass rounded-lg shadow p-6">
                 <div className="flex items-center">
                   <div className="p-3 rounded-full bg-purple-100">
                     <FaChartBar className="h-6 w-6 text-purple-600" />
                   </div>
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Active Users</p>
-                    <p className="text-2xl font-semibold text-gray-900">{stats.activeUsers}</p>
+                    <p className="text-sm font-medium text-indigo-200">Active Users</p>
+                    <p className="text-2xl font-semibold text-white">{stats.activeUsers}</p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="glass rounded-lg shadow p-6">
                 <div className="flex items-center">
                   <div className="p-3 rounded-full bg-yellow-100">
                     <FaCog className="h-6 w-6 text-yellow-600" />
                   </div>
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Playlists</p>
-                    <p className="text-2xl font-semibold text-gray-900">{stats.totalPlaylists}</p>
+                    <p className="text-sm font-medium text-indigo-200">Playlists</p>
+                    <p className="text-2xl font-semibold text-white">{stats.totalPlaylists}</p>
                   </div>
                 </div>
               </div>
@@ -205,10 +205,10 @@ export default function AdminDashboard() {
             {/* Quick Actions */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
               {/* Users Management */}
-              <div className="bg-white rounded-lg shadow">
-                <div className="p-6 border-b border-gray-200">
+              <div className="glass rounded-lg shadow">
+                <div className="p-6 border-b border-white/20">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-medium text-gray-900">Users Management</h3>
+                    <h3 className="text-lg font-medium text-white">Users Management</h3>
                     <Link
                       to="/admin/users"
                       className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
@@ -222,12 +222,12 @@ export default function AdminDashboard() {
                   <div className="space-y-4">
                     {recentUsers.length > 0 ? (
                       recentUsers.map(user => (
-                        <div key={user.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div key={user.id} className="flex items-center justify-between p-3 bg-white/10 rounded-lg">
                           <div>
-                            <p className="text-sm font-medium text-gray-900">
+                            <p className="text-sm font-medium text-white">
                               {user.name !== 'Unnamed User' ? user.name : 'User ' + user.id.substring(0, 6)}
                             </p>
-                            <p className="text-sm text-gray-500">{user.email}</p>
+                            <p className="text-sm text-indigo-200">{user.email}</p>
                           </div>
                           <div className="flex items-center space-x-2">
                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
@@ -237,7 +237,7 @@ export default function AdminDashboard() {
                             </span>
                             <button 
                               onClick={() => handleDeleteUser(user.id)}
-                              className="p-1 text-red-600 hover:text-red-800 cursor-pointer" 
+                              className="p-1 text-red-400 hover:text-red-300 cursor-pointer" 
                               title="Delete user"
                             >
                               <FaTrash className="h-4 w-4" />
@@ -246,7 +246,7 @@ export default function AdminDashboard() {
                         </div>
                       ))
                     ) : (
-                      <div className="text-center py-4 text-gray-500">
+                      <div className="text-center py-4 text-indigo-200">
                         <p>No users found</p>
                       </div>
                     )}
@@ -255,10 +255,10 @@ export default function AdminDashboard() {
               </div>
 
               {/* Music Management */}
-              <div className="bg-white rounded-lg shadow">
-                <div className="p-6 border-b border-gray-200">
+              <div className="glass rounded-lg shadow">
+                <div className="p-6 border-b border-white/20">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-medium text-gray-900">Music Management</h3>
+                    <h3 className="text-lg font-medium text-white">Music Management</h3>
                     <Link
                       to="/admin/musics"
                       className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
@@ -272,18 +272,18 @@ export default function AdminDashboard() {
                   <div className="space-y-4">
                     {recentMusic.length > 0 ? (
                       recentMusic.map(music => (
-                        <div key={music.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div key={music.id} className="flex items-center justify-between p-3 bg-white/10 rounded-lg">
                           <div>
-                            <p className="text-sm font-medium text-gray-900">{music.title || 'Untitled Track'}</p>
-                            <p className="text-sm text-gray-500">{music.artist || 'Unknown Artist'} • {music.genre || 'Unknown Genre'}</p>
+                            <p className="text-sm font-medium text-white">{music.title || 'Untitled Track'}</p>
+                            <p className="text-sm text-indigo-200">{music.artist || 'Unknown Artist'} • {music.genre || 'Unknown Genre'}</p>
                           </div>
                           <div className="flex space-x-2">
-                            <button className="p-1 text-blue-600 hover:text-blue-800 cursor-pointer" title="Edit music">
+                            <button className="p-1 text-blue-400 hover:text-blue-300 cursor-pointer" title="Edit music">
                               <FaEdit className="h-4 w-4" />
                             </button>
                             <button 
                               onClick={() => handleDeleteMusic(music.id)}
-                              className="p-1 text-red-600 hover:text-red-800 cursor-pointer" 
+                              className="p-1 text-red-400 hover:text-red-300 cursor-pointer" 
                               title="Delete music track"
                             >
                               <FaTrash className="h-4 w-4" />
@@ -292,7 +292,7 @@ export default function AdminDashboard() {
                         </div>
                       ))
                     ) : (
-                      <div className="text-center py-4 text-gray-500">
+                      <div className="text-center py-4 text-indigo-200">
                         <p>No music found</p>
                       </div>
                     )}
@@ -302,20 +302,20 @@ export default function AdminDashboard() {
             </div>
 
             {/* System Status */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">System Status</h3>
+            <div className="glass rounded-lg shadow p-6">
+              <h3 className="text-lg font-medium text-white mb-4">System Status</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="flex items-center">
                   <div className="w-3 h-3 bg-green-400 rounded-full mr-3"></div>
-                  <span className="text-sm text-gray-600">Database: Online</span>
+                  <span className="text-sm text-indigo-200">Database: Online</span>
                 </div>
                 <div className="flex items-center">
                   <div className="w-3 h-3 bg-green-400 rounded-full mr-3"></div>
-                  <span className="text-sm text-gray-600">Storage: Online</span>
+                  <span className="text-sm text-indigo-200">Storage: Online</span>
                 </div>
                 <div className="flex items-center">
                   <div className="w-3 h-3 bg-green-400 rounded-full mr-3"></div>
-                  <span className="text-sm text-gray-600">API: Online</span>
+                  <span className="text-sm text-indigo-200">API: Online</span>
                 </div>
               </div>
             </div>

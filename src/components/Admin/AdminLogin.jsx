@@ -125,17 +125,17 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         {/* Header */}
         <div className="text-center">
-          <div className="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-purple-600">
-            <FaUserShield className="h-6 w-6 text-white" />
+          <div className="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-purple-500/20 border border-purple-400/30">
+            <FaUserShield className="h-6 w-6 text-purple-300" />
           </div>
-          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
+          <h2 className="mt-6 text-3xl font-extrabold text-white">
             Admin Access
           </h2>
-          <p className="mt-2 text-sm text-gray-600">
+          <p className="mt-2 text-sm text-indigo-200">
             Enter your admin credentials to continue
           </p>
         </div>
@@ -145,12 +145,12 @@ export default function AdminLogin() {
           <div className="space-y-4">
             {/* Email Field */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="email" className="block text-sm font-medium text-white mb-1">
                 Email Address
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaEnvelope className="h-5 w-5 text-gray-400" />
+                  <FaEnvelope className="h-5 w-5 text-indigo-300" />
                 </div>
                 <input
                   id="email"
@@ -160,7 +160,7 @@ export default function AdminLogin() {
                   required
                   value={formData.email}
                   onChange={handleChange}
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                  className="block w-full pl-10 pr-3 py-2 border border-white/30 rounded-md leading-5 bg-white/10 text-white placeholder-white/50 focus:outline-none focus:placeholder-white/70 focus:ring-2 focus:ring-purple-400 focus:border-purple-400"
                   placeholder="Enter your email"
                 />
               </div>
@@ -168,12 +168,12 @@ export default function AdminLogin() {
 
             {/* Password Field */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="password" className="block text-sm font-medium text-white mb-1">
                 Password
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaLock className="h-5 w-5 text-gray-400" />
+                  <FaLock className="h-5 w-5 text-indigo-300" />
                 </div>
                 <input
                   id="password"
@@ -183,7 +183,7 @@ export default function AdminLogin() {
                   required
                   value={formData.password}
                   onChange={handleChange}
-                  className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                  className="block w-full pl-10 pr-10 py-2 border border-white/30 rounded-md leading-5 bg-white/10 text-white placeholder-white/50 focus:outline-none focus:placeholder-white/70 focus:ring-2 focus:ring-purple-400 focus:border-purple-400"
                   placeholder="Enter your password"
                 />
                 <button
@@ -192,9 +192,9 @@ export default function AdminLogin() {
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
-                    <FaEyeSlash className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                    <FaEyeSlash className="h-5 w-5 text-indigo-300 hover:text-indigo-200" />
                   ) : (
-                    <FaEye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                    <FaEye className="h-5 w-5 text-indigo-300 hover:text-indigo-200" />
                   )}
                 </button>
               </div>
@@ -203,7 +203,7 @@ export default function AdminLogin() {
 
           {/* Error Display */}
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
+            <div className="bg-red-500/20 backdrop-blur-lg border border-red-500/30 text-red-300 px-4 py-3 rounded-md">
               <p className="text-sm">{error}</p>
             </div>
           )}
@@ -215,8 +215,8 @@ export default function AdminLogin() {
               disabled={loading}
               className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white ${
                 loading
-                  ? 'bg-purple-400 cursor-not-allowed'
-                  : 'bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500'
+                  ? 'bg-purple-400/50 cursor-not-allowed'
+                  : 'bg-purple-500 hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-400'
               }`}
             >
               {loading ? (
@@ -235,7 +235,7 @@ export default function AdminLogin() {
             <button
               type="button"
               onClick={() => navigate('/')}
-              className="text-purple-600 hover:text-purple-500 text-sm font-medium"
+              className="text-purple-300 hover:text-purple-200 text-sm font-medium"
             >
               ← Back to Landing Page
             </button>

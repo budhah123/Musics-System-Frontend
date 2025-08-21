@@ -42,14 +42,14 @@ export default function Navbar() {
   if (isLandingPage) return null;
 
   return (
-    <nav className="bg-white shadow-lg border-b border-gray-200">
+    <nav className="nav-glass shadow-lg border-b border-white/20 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between items-center h-16">
           {/* Logo and Brand */}
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2">
-              <FaMusic className="text-2xl text-indigo-600" />
-              <span className="text-xl font-bold text-gray-900">
+              <FaMusic className="text-2xl text-white" />
+              <span className="text-xl font-bold text-white">
                 {isAdminDashboard ? 'Admin Dashboard' : 'Music System'}
               </span>
             </Link>
@@ -61,28 +61,28 @@ export default function Navbar() {
               <>
                 <Link
                   to="/user"
-                  className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                  className="text-white hover:text-indigo-200 px-3 py-2 rounded-md text-sm font-medium transition-colors"
                 >
                   <FaHome className="inline mr-2" />
                   Home
                 </Link>
                 <Link
                   to="/user/musics"
-                  className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                  className="text-white hover:text-indigo-200 px-3 py-2 rounded-md text-sm font-medium transition-colors"
                 >
                   <FaMusic className="inline mr-2" />
                   Music Library
                 </Link>
                 <Link
                   to="/user/favorites"
-                  className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                  className="text-white hover:text-indigo-200 px-3 py-2 rounded-md text-sm font-medium transition-colors"
                 >
                   <FaHeart className="inline mr-2" />
                   Favorites
                 </Link>
                 <Link
                   to="/user/downloads"
-                  className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                  className="text-white hover:text-indigo-200 px-3 py-2 rounded-md text-sm font-medium transition-colors"
                 >
                   <FaDownload className="inline mr-2" />
                   Downloads
@@ -94,21 +94,21 @@ export default function Navbar() {
               <>
                 <Link
                   to="/admin"
-                  className="text-gray-700 hover:text-purple-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                  className="text-white hover:text-purple-200 px-3 py-2 rounded-md text-sm font-medium transition-colors"
                 >
                   <FaHome className="inline mr-2" />
                   Dashboard
                 </Link>
                 <Link
                   to="/admin/users"
-                  className="text-gray-700 hover:text-purple-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                  className="text-white hover:text-purple-200 px-3 py-2 rounded-md text-sm font-medium transition-colors"
                 >
                   <FaUser className="inline mr-2" />
                   Users
                 </Link>
                 <Link
                   to="/admin/musics"
-                  className="text-gray-700 hover:text-purple-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                  className="text-white hover:text-purple-200 px-3 py-2 rounded-md text-sm font-medium transition-colors"
                 >
                   <FaMusic className="inline mr-2" />
                   Music
@@ -122,8 +122,8 @@ export default function Navbar() {
             {isAuthenticated && isUserDashboard ? (
               <div className="flex items-center space-x-4">
                 <div className="flex items-center space-x-2">
-                  <FaUser className="text-gray-500" />
-                  <span className="text-sm text-gray-700">{user?.name || user?.email}</span>
+                  <FaUser className="text-white" />
+                  <span className="text-sm text-white">{user?.name || user?.email}</span>
                 </div>
                 <button
                   onClick={handleLogout}
@@ -138,8 +138,8 @@ export default function Navbar() {
                 {isAdminAuthenticated() ? (
                   <>
                     <div className="flex items-center space-x-2">
-                      <FaUserCog className="text-gray-500" />
-                      <span className="text-sm text-gray-700">
+                      <FaUserCog className="text-white" />
+                      <span className="text-sm text-white">
                         {JSON.parse(localStorage.getItem('adminUser'))?.name || 'Admin'}
                       </span>
                     </div>
@@ -153,7 +153,7 @@ export default function Navbar() {
                   </>
                 ) : (
                   <>
-                    <span className="text-sm text-gray-600 flex items-center">
+                    <span className="text-sm text-white flex items-center">
                       <FaUserCog className="mr-2" />
                       Admin Access Required
                     </span>
@@ -170,7 +170,7 @@ export default function Navbar() {
               <div className="flex items-center space-x-4">
                 <Link
                   to="/user"
-                  className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                  className="text-white hover:text-indigo-200 px-3 py-2 rounded-md text-sm font-medium transition-colors"
                 >
                   User Dashboard
                 </Link>
@@ -193,28 +193,28 @@ export default function Navbar() {
             <>
               <Link
                 to="/user"
-                className="text-gray-700 hover:text-indigo-600 block px-3 py-2 rounded-md text-base font-medium"
+                className="text-white hover:text-indigo-200 block px-3 py-2 rounded-md text-base font-medium"
               >
                 <FaHome className="inline mr-2" />
                 Home
               </Link>
               <Link
                 to="/user/musics"
-                className="text-gray-700 hover:text-indigo-600 block px-3 py-2 rounded-md text-base font-medium"
+                className="text-white hover:text-indigo-200 block px-3 py-2 rounded-md text-base font-medium"
               >
                 <FaMusic className="inline mr-2" />
                 Music Library
               </Link>
                              <Link
                  to="/user/favorites"
-                 className="text-gray-700 hover:text-indigo-600 block px-3 py-2 rounded-md text-base font-medium"
+                 className="text-white hover:text-indigo-200 block px-3 py-2 rounded-md text-base font-medium"
                >
                  <FaHeart className="inline mr-2" />
                  Favorites
                </Link>
                <Link
                  to="/user/downloads"
-                 className="text-gray-700 hover:text-indigo-600 block px-3 py-2 rounded-md text-base font-medium"
+                 className="text-white hover:text-indigo-200 block px-3 py-2 rounded-md text-base font-medium"
                >
                  <FaDownload className="inline mr-2" />
                  Downloads
@@ -226,21 +226,21 @@ export default function Navbar() {
             <>
               <Link
                 to="/admin"
-                className="text-gray-700 hover:text-purple-600 block px-3 py-2 rounded-md text-base font-medium"
+                className="text-white hover:text-purple-200 block px-3 py-2 rounded-md text-base font-medium"
               >
                 <FaHome className="inline mr-2" />
                 Dashboard
               </Link>
               <Link
                 to="/admin/users"
-                className="text-gray-700 hover:text-purple-600 block px-3 py-2 rounded-md text-base font-medium"
+                className="text-white hover:text-purple-200 block px-3 py-2 rounded-md text-base font-medium"
               >
                 <FaUser className="inline mr-2" />
                 Users
               </Link>
               <Link
                 to="/admin/musics"
-                className="text-gray-700 hover:text-purple-600 block px-3 py-2 rounded-md text-base font-medium"
+                className="text-white hover:text-purple-200 block px-3 py-2 rounded-md text-base font-medium"
               >
                 <FaMusic className="inline mr-2" />
                 Music

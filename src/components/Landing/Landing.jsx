@@ -11,8 +11,11 @@ export default function Landing() {
   };
 
   const handleMusicCardClick = () => {
-    navigate('/user/register');
+    navigate('/user/login');
   };
+
+  // Debug: Check if icons are imported
+  console.log('Icons imported:', { FaUsers, FaUserCog, FaMusic });
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900">
@@ -22,7 +25,7 @@ export default function Landing() {
           <div className="flex justify-between items-center">
             {/* Left Side - App Brand */}
             <div className="flex items-center space-x-3 group">
-              <FaMusic className="text-3xl text-white group-hover:scale-110 transition-transform duration-300 animate-float" />
+              <FaMusic size={32} className="text-3xl text-white group-hover:scale-110 transition-transform duration-300 animate-float" />
               <span className="text-2xl font-bold text-white group-hover:text-indigo-200 transition-colors duration-300">
                 Musics App
               </span>
@@ -34,7 +37,7 @@ export default function Landing() {
                 onClick={() => handleDashboardClick('/user')}
                 className="btn-hover bg-indigo-500 hover:bg-indigo-600 text-white px-6 py-3 rounded-xl font-medium transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl flex items-center space-x-2"
               >
-                <FaUsers className="text-lg" />
+                <FaUsers size={20} className="text-lg" />
                 <span>User Dashboard</span>
               </button>
               
@@ -42,7 +45,7 @@ export default function Landing() {
                 onClick={() => handleDashboardClick('/admin/login')}
                 className="btn-hover bg-purple-500 hover:bg-purple-600 text-white px-6 py-3 rounded-xl font-medium transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl flex items-center space-x-2"
               >
-                <FaUserCog className="text-lg" />
+                <FaUserCog size={20} className="text-lg" />
                 <span>Admin Dashboard</span>
               </button>
             </div>

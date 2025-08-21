@@ -74,7 +74,18 @@ export default function Register() {
     setLoading(true);
     try {
       await register(formData);
-      navigate('/user/musics');
+      
+      // Check if there's a redirect path stored in localStorage
+      const redirectPath = localStorage.getItem('redirectAfterLogin');
+      if (redirectPath) {
+        // Clear the stored redirect path
+        localStorage.removeItem('redirectAfterLogin');
+        // Redirect to the stored path
+        navigate(redirectPath, { replace: true });
+      } else {
+        // Default redirect to user musics page
+        navigate('/user/musics');
+      }
     } catch (error) {
       // Error is already handled by the auth context
       console.error('Registration error:', error);
@@ -84,21 +95,21 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-blue-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         {/* Header */}
         <div className="text-center">
           <div className="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-green-600">
             <FaUserPlus className="h-6 w-6 text-white" />
           </div>
-          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
+          <h2 className="mt-6 text-3xl font-extrabold text-white">
             Create your account
           </h2>
-          <p className="mt-2 text-sm text-gray-600">
+          <p className="mt-2 text-sm text-indigo-200">
             Or{' '}
             <Link
               to="/user/login"
-              className="font-medium text-green-600 hover:text-green-500"
+              className="font-medium text-green-300 hover:text-green-200"
             >
               sign in to your existing account
             </Link>
@@ -110,12 +121,12 @@ export default function Register() {
           <div className="space-y-4">
             {/* Full Name Field */}
             <div>
-              <label htmlFor="fullname" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="fullname" className="block text-sm font-medium text-white mb-1">
                 Full Name
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaUser className="h-5 w-5 text-gray-400" />
+                  <FaUser className="h-5 w-5 text-indigo-300" />
                 </div>
                 <input
                   id="fullname"
@@ -126,24 +137,24 @@ export default function Register() {
                   value={formData.fullname}
                   onChange={handleChange}
                   className={`appearance-none relative block w-full pl-10 pr-3 py-3 border ${
-                    errors.fullname ? 'border-red-300' : 'border-gray-300'
-                  } placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm`}
+                    errors.fullname ? 'border-red-300' : 'border-indigo-300'
+                  } placeholder-indigo-300 text-white bg-white/10 backdrop-blur-sm rounded-lg focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm`}
                   placeholder="Enter your full name"
                 />
               </div>
               {errors.fullname && (
-                <p className="mt-1 text-sm text-red-600">{errors.fullname}</p>
+                <p className="mt-1 text-sm text-red-400">{errors.fullname}</p>
               )}
             </div>
 
             {/* Email Field */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="email" className="block text-sm font-medium text-white mb-1">
                 Email address
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaEnvelope className="h-5 w-5 text-gray-400" />
+                  <FaEnvelope className="h-5 w-5 text-indigo-300" />
                 </div>
                 <input
                   id="email"
@@ -154,24 +165,24 @@ export default function Register() {
                   value={formData.email}
                   onChange={handleChange}
                   className={`appearance-none relative block w-full pl-10 pr-3 py-3 border ${
-                    errors.email ? 'border-red-300' : 'border-gray-300'
-                  } placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm`}
+                    errors.email ? 'border-red-300' : 'border-indigo-300'
+                  } placeholder-indigo-300 text-white bg-white/10 backdrop-blur-sm rounded-lg focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm`}
                   placeholder="Enter your email"
                 />
               </div>
               {errors.email && (
-                <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                <p className="mt-1 text-sm text-red-400">{errors.email}</p>
               )}
             </div>
 
             {/* Password Field */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="password" className="block text-sm font-medium text-white mb-1">
                 Password
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaLock className="h-5 w-5 text-gray-400" />
+                  <FaLock className="h-5 w-5 text-indigo-300" />
                 </div>
                 <input
                   id="password"
@@ -182,8 +193,8 @@ export default function Register() {
                   value={formData.password}
                   onChange={handleChange}
                   className={`appearance-none relative block w-full pl-10 pr-12 py-3 border ${
-                    errors.password ? 'border-red-300' : 'border-gray-300'
-                  } placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm`}
+                    errors.password ? 'border-red-300' : 'border-indigo-300'
+                  } placeholder-indigo-300 text-white bg-white/10 backdrop-blur-sm rounded-lg focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm`}
                   placeholder="Create a password"
                 />
                 <button
@@ -192,25 +203,25 @@ export default function Register() {
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
-                    <FaEyeSlash className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                    <FaEyeSlash className="h-5 w-5 text-indigo-300 hover:text-indigo-200" />
                   ) : (
-                    <FaEye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                    <FaEye className="h-5 w-5 text-indigo-300 hover:text-indigo-200" />
                   )}
                 </button>
               </div>
               {errors.password && (
-                <p className="mt-1 text-sm text-red-600">{errors.password}</p>
+                <p className="mt-1 text-sm text-red-400">{errors.password}</p>
               )}
             </div>
 
             {/* Confirm Password Field */}
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-white mb-1">
                 Confirm Password
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaLock className="h-5 w-5 text-gray-400" />
+                  <FaLock className="h-5 w-5 text-indigo-300" />
                 </div>
                 <input
                   id="confirmPassword"
@@ -221,8 +232,8 @@ export default function Register() {
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   className={`appearance-none relative block w-full pl-10 pr-12 py-3 border ${
-                    errors.confirmPassword ? 'border-red-300' : 'border-gray-300'
-                  } placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm`}
+                    errors.confirmPassword ? 'border-red-300' : 'border-indigo-300'
+                  } placeholder-indigo-300 text-white bg-white/10 backdrop-blur-sm rounded-lg focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm`}
                   placeholder="Confirm your password"
                 />
                 <button
@@ -231,14 +242,14 @@ export default function Register() {
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 >
                   {showConfirmPassword ? (
-                    <FaEyeSlash className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                    <FaEyeSlash className="h-5 w-5 text-indigo-300 hover:text-indigo-200" />
                   ) : (
-                    <FaEye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                    <FaEye className="h-5 w-5 text-indigo-300 hover:text-indigo-200" />
                   )}
                 </button>
               </div>
               {errors.confirmPassword && (
-                <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
+                <p className="mt-1 text-sm text-red-400">{errors.confirmPassword}</p>
               )}
             </div>
           </div>
@@ -262,7 +273,7 @@ export default function Register() {
               ) : (
                 <>
                   <span className="absolute left-0 inset-y-0 flex items-center pl-3">
-                    <FaUserPlus className="h-5 w-5 text-green-500 group-hover:text-green-400" />
+                    <FaUserPlus className="h-5 w-5 text-green-300 group-hover:text-green-200" />
                   </span>
                   Create Account
                 </>
@@ -274,7 +285,7 @@ export default function Register() {
           <div className="text-center">
             <Link
               to="/user"
-              className="font-medium text-green-600 hover:text-green-500 text-sm"
+              className="font-medium text-green-300 hover:text-green-200 text-sm"
             >
               Back to Home
             </Link>

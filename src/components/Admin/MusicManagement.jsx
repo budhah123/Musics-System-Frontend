@@ -176,33 +176,33 @@ export default function MusicManagement() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600"></div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-300"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Music Management</h1>
-          <p className="text-gray-600">Upload, edit, and manage music tracks</p>
+          <h1 className="text-3xl font-bold text-white">Music Management</h1>
+          <p className="text-indigo-200">Upload, edit, and manage music tracks</p>
         </div>
 
         {/* Search and Actions */}
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
+        <div className="glass rounded-lg shadow p-6 mb-6">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1">
               <div className="relative">
-                <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-indigo-300" />
                 <input
                   type="text"
                   placeholder="Search music by title, artist, or genre..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full pl-10 pr-4 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-indigo-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 />
               </div>
             </div>
@@ -215,7 +215,7 @@ export default function MusicManagement() {
             </button>
             <button 
               onClick={loadMusics}
-              className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+              className="inline-flex items-center px-4 py-2 border border-white/30 text-sm font-medium rounded-md text-white bg-white/10 hover:bg-white/20"
             >
               <FaSearch className="mr-2 h-4 w-4" />
               Refresh
@@ -225,12 +225,12 @@ export default function MusicManagement() {
 
         {/* Upload Form */}
         {showUploadForm && (
-          <div className="bg-white rounded-lg shadow p-6 mb-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Upload New Music</h3>
+          <div className="glass rounded-lg shadow p-6 mb-6">
+            <h3 className="text-lg font-medium text-white mb-4">Upload New Music</h3>
             <form onSubmit={handleUploadSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-white mb-1">
                     Title *
                   </label>
                   <input
@@ -239,12 +239,12 @@ export default function MusicManagement() {
                     value={uploadForm.title}
                     onChange={handleUploadFormChange}
                     required
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    className="w-full bg-white/20 backdrop-blur-sm border border-white/30 rounded-md px-3 py-2 text-white placeholder-indigo-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
                     placeholder="Enter music title"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-white mb-1">
                     Artist *
                   </label>
                   <input
@@ -253,7 +253,7 @@ export default function MusicManagement() {
                     value={uploadForm.artist}
                     onChange={handleUploadFormChange}
                     required
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    className="w-full bg-white/20 backdrop-blur-sm border border-white/30 rounded-md px-3 py-2 text-white placeholder-indigo-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
                     placeholder="Enter artist name"
                   />
                 </div>
@@ -261,7 +261,7 @@ export default function MusicManagement() {
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-white mb-1">
                     Genre
                   </label>
                   <input
@@ -269,12 +269,12 @@ export default function MusicManagement() {
                     name="genre"
                     value={uploadForm.genre}
                     onChange={handleUploadFormChange}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    className="w-full bg-white/20 backdrop-blur-sm border border-white/30 rounded-md px-3 py-2 text-white placeholder-indigo-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
                     placeholder="Enter genre (optional)"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-white mb-1">
                     Audio File *
                   </label>
                   <input
@@ -283,14 +283,14 @@ export default function MusicManagement() {
                     onChange={handleUploadFormChange}
                     accept="audio/*"
                     required
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    className="w-full bg-white/20 backdrop-blur-sm border border-white/30 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Supported formats: MP3, WAV, AAC, OGG</p>
+                  <p className="text-xs text-indigo-300 mt-1">Supported formats: MP3, WAV, AAC, OGG</p>
                 </div>
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-white mb-1">
                   Thumbnail Image
                 </label>
                 <input
@@ -298,9 +298,9 @@ export default function MusicManagement() {
                   name="thumbnailFile"
                   onChange={handleUploadFormChange}
                   accept="image/*"
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  className="w-full bg-white/20 backdrop-blur-sm border border-white/30 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
                 />
-                <p className="text-xs text-gray-500 mt-1">Optional: JPG, PNG, GIF (max 5MB)</p>
+                <p className="text-xs text-indigo-300 mt-1">Optional: JPG, PNG, GIF (max 5MB)</p>
               </div>
               
               <div className="flex space-x-3 pt-2">
@@ -318,7 +318,7 @@ export default function MusicManagement() {
                 <button
                   type="button"
                   onClick={resetUploadForm}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                  className="px-4 py-2 border border-white/30 rounded-md text-sm font-medium text-white bg-white/20 hover:bg-white/30"
                 >
                   Cancel
                 </button>
@@ -329,7 +329,7 @@ export default function MusicManagement() {
 
         {/* Error Display */}
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+          <div className="glass border border-red-500/30 text-red-300 px-4 py-3 rounded mb-6">
             {error}
           </div>
         )}
@@ -337,7 +337,7 @@ export default function MusicManagement() {
         {/* Music List */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredMusics.map(music => (
-            <div key={music.id} className="bg-white rounded-lg shadow overflow-hidden hover:shadow-lg transition-shadow">
+            <div key={music.id} className="glass rounded-lg shadow overflow-hidden hover:shadow-lg transition-shadow">
               {/* Thumbnail */}
               <div className="relative h-48 bg-gray-200">
                 <img
@@ -365,37 +365,37 @@ export default function MusicManagement() {
               {/* Music Info */}
               <div className="p-4">
                 <div className="mb-3">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                  <h3 className="text-lg font-semibold text-white mb-1">
                     {editingMusic?.id === music.id ? (
                       <input
                         type="text"
                         value={editingMusic.title || ''}
                         onChange={(e) => setEditingMusic({...editingMusic, title: e.target.value})}
-                        className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
+                        className="w-full bg-white/20 backdrop-blur-sm border border-white/30 rounded px-2 py-1 text-sm text-white"
                       />
                     ) : (
                       music.title || 'Untitled'
                     )}
                   </h3>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-indigo-200">
                     {editingMusic?.id === music.id ? (
                       <input
                         type="text"
                         value={editingMusic.artist || ''}
                         onChange={(e) => setEditingMusic({...editingMusic, artist: e.target.value})}
-                        className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
+                        className="w-full bg-white/20 backdrop-blur-sm border border-white/30 rounded px-2 py-1 text-sm text-white"
                       />
                     ) : (
                       music.artist || 'Unknown Artist'
                     )}
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-indigo-300">
                     {editingMusic?.id === music.id ? (
                       <input
                         type="text"
                         value={editingMusic.genre || ''}
                         onChange={(e) => setEditingMusic({...editingMusic, genre: e.target.value})}
-                        className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
+                        className="w-full bg-white/20 backdrop-blur-sm border border-white/30 rounded px-2 py-1 text-sm text-white"
                       />
                     ) : (
                       music.genre || 'Unknown Genre'
@@ -423,13 +423,13 @@ export default function MusicManagement() {
                     <div className="flex space-x-2">
                       <button
                         onClick={handleSaveEdit}
-                        className="text-green-600 hover:text-green-900 text-sm font-medium"
+                        className="text-green-400 hover:text-green-300 text-sm font-medium"
                       >
                         Save
                       </button>
                       <button
                         onClick={handleCancelEdit}
-                        className="text-gray-600 hover:text-gray-900 text-sm font-medium"
+                        className="text-indigo-300 hover:text-indigo-200 text-sm font-medium"
                       >
                         Cancel
                       </button>
@@ -437,7 +437,7 @@ export default function MusicManagement() {
                   ) : (
                     <button
                       onClick={() => handleEdit(music)}
-                      className="text-indigo-600 hover:text-indigo-900"
+                      className="text-indigo-400 hover:text-indigo-300"
                     >
                       <FaEdit className="h-4 w-4" />
                     </button>
@@ -449,7 +449,7 @@ export default function MusicManagement() {
                     className={`${
                       deletingMusicId === music.id
                         ? 'text-gray-400 cursor-not-allowed'
-                        : 'text-red-600 hover:text-red-900 cursor-pointer'
+                        : 'text-red-400 hover:text-red-300 cursor-pointer'
                     }`}
                     title="Delete music track"
                   >
@@ -465,25 +465,25 @@ export default function MusicManagement() {
           <div className="text-center py-12">
             {musics.length === 0 ? (
               <div>
-                <p className="text-gray-500 mb-2">No music found in the system.</p>
-                <p className="text-sm text-gray-400">Music tracks will appear here once they are uploaded.</p>
+                <p className="text-indigo-200 mb-2">No music found in the system.</p>
+                <p className="text-sm text-indigo-300">Music tracks will appear here once they are uploaded.</p>
               </div>
             ) : (
-              <p className="text-gray-500">No music found matching your search criteria.</p>
+              <p className="text-indigo-200">No music found matching your search criteria.</p>
             )}
           </div>
         )}
 
         {/* Pagination */}
         <div className="mt-8 flex items-center justify-between">
-          <div className="text-sm text-gray-700">
+          <div className="text-sm text-indigo-200">
             Showing {filteredMusics.length} of {musics.length} music tracks
           </div>
           <div className="flex space-x-2">
-            <button className="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+            <button className="px-3 py-2 border border-white/30 rounded-md text-sm font-medium text-white bg-white/10 hover:bg-white/20">
               Previous
             </button>
-            <button className="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+            <button className="px-3 py-2 border border-white/30 rounded-md text-sm font-medium text-white bg-white/10 hover:bg-white/20">
               Next
             </button>
           </div>
