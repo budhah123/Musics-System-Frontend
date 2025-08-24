@@ -275,7 +275,7 @@ export default function AdminDashboard() {
                         <div key={music.id} className="flex items-center justify-between p-3 bg-white/10 rounded-lg">
                           <div>
                             <p className="text-sm font-medium text-white">{music.title || 'Untitled Track'}</p>
-                            <p className="text-sm text-indigo-200">{music.artist || 'Unknown Artist'} • {music.genre || 'Unknown Genre'}</p>
+                            <p className="text-sm text-indigo-200">{music.artist || 'Unknown Artist'} • {music.category || 'Unknown Category'}</p>
                           </div>
                           <div className="flex space-x-2">
                             <button className="p-1 text-blue-400 hover:text-blue-300 cursor-pointer" title="Edit music">

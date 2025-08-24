@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useRef, useCallback } from 'react';
+import React, { createContext, useContext, useState, useRef, useCallback, useEffect } from 'react';
 
 const MusicPlayerContext = createContext();
 
@@ -19,12 +19,13 @@ export const MusicPlayerProvider = ({ children }) => {
   const [isMuted, setIsMuted] = useState(false);
   const [playlist, setPlaylist] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [showPlayer, setShowPlayer] = useState(false);
   
   const audioRef = useRef(new Audio());
   const audio = audioRef.current;
 
   // Initialize audio element
-  React.useEffect(() => {
+  useEffect(() => {
     audio.addEventListener('loadedmetadata', () => {
       setDuration(audio.duration);
     });
@@ -41,6 +42,10 @@ export const MusicPlayerProvider = ({ children }) => {
         if (playlist[nextIndex]) {
           playTrack(playlist[nextIndex], true);
         }
+      } else {
+        // Reset if no playlist
+        setIsPlaying(false);
+        setCurrentTime(0);
       }
     });
 
@@ -49,28 +54,40 @@ export const MusicPlayerProvider = ({ children }) => {
       setIsPlaying(false);
     });
 
+    // Set initial volume
+    audio.volume = volume;
+
     return () => {
       audio.pause();
       audio.src = '';
     };
-  }, [audio, playlist, currentIndex, playTrack]);
+  }, [audio, playlist, currentIndex]);
 
   // Update volume when it changes
-  React.useEffect(() => {
+  useEffect(() => {
     audio.volume = volume;
   }, [volume, audio]);
 
   // Play a specific track
   const playTrack = useCallback((track, autoPlay = true) => {
-    if (!track || !track.audioUrl) {
+    if (!track) {
+      console.error('No track provided');
+      return;
+    }
+
+    // Get audio URL from various possible properties
+    const audioUrl = track.audioUrl || track.audio || track.musicUrl || track.url;
+    
+    if (!audioUrl) {
       console.error('No audio URL provided for track:', track);
       return;
     }
 
     setCurrentTrack(track);
+    setShowPlayer(true);
     
-    if (audio.src !== track.audioUrl) {
-      audio.src = track.audioUrl;
+    if (audio.src !== audioUrl) {
+      audio.src = audioUrl;
       audio.load();
     }
 
@@ -102,7 +119,7 @@ export const MusicPlayerProvider = ({ children }) => {
     setIsPlaying(false);
   }, [audio]);
 
-  // Toggle play/pause
+  // Toggle play/pause for current track
   const togglePlay = useCallback(() => {
     if (isPlaying) {
       pause();
@@ -111,12 +128,25 @@ export const MusicPlayerProvider = ({ children }) => {
     }
   }, [isPlaying, play, pause]);
 
+  // Toggle play/pause for a specific track
+  const toggleTrackPlay = useCallback((track) => {
+    if (currentTrack && currentTrack.id === track.id && isPlaying) {
+      // Same track is playing, pause it
+      pause();
+    } else {
+      // Different track or current track is paused, play the new track
+      playTrack(track, true);
+    }
+  }, [currentTrack, isPlaying, pause, playTrack]);
+
   // Stop current track
   const stop = useCallback(() => {
     audio.pause();
     audio.currentTime = 0;
     setIsPlaying(false);
     setCurrentTime(0);
+    setCurrentTrack(null);
+    setShowPlayer(false);
   }, [audio]);
 
   // Seek to specific time
@@ -175,6 +205,11 @@ export const MusicPlayerProvider = ({ children }) => {
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   }, []);
 
+  // Check if a specific track is currently playing
+  const isTrackPlaying = useCallback((trackId) => {
+    return currentTrack && currentTrack.id === trackId && isPlaying;
+  }, [currentTrack, isPlaying]);
+
   const value = {
     // State
     currentTrack,
@@ -185,12 +220,14 @@ export const MusicPlayerProvider = ({ children }) => {
     isMuted,
     playlist,
     currentIndex,
+    showPlayer,
     
     // Actions
     playTrack,
     play,
     pause,
     togglePlay,
+    toggleTrackPlay,
     stop,
     seek,
     setVolumeLevel,
@@ -198,9 +235,11 @@ export const MusicPlayerProvider = ({ children }) => {
     setPlaylistAndPlay,
     handleNext,
     handlePrevious,
+    setShowPlayer,
     
     // Utilities
-    formatTime
+    formatTime,
+    isTrackPlaying
   };
 
   return (

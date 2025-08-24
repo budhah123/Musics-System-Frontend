@@ -335,3 +335,8 @@ audio::-webkit-media-controls-play-button {
     display: none;
   }
 }
+
+/* Add bottom padding for fixed audio player */
+body {
+  padding-bottom: 80px;
+}

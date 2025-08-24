@@ -3,8 +3,10 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from './context/AuthContext';
 import { FavoritesProvider } from './context/FavoritesContext';
 import { DownloadsProvider } from './context/DownloadsContext';
+import { MusicPlayerProvider } from './context/MusicPlayerContext';
 import { ToastContainer } from './components/Common/Toast';
 import Navbar from './components/Layout/Navbar';
+import AudioPlayer from './components/Common/AudioPlayer';
 import ProtectedRoute, { RequireAuth, RequireGuest } from './components/Layout/ProtectedRoute';
 
 // Landing and Navigation
@@ -31,100 +33,105 @@ function App() {
     <AuthProvider>
       <FavoritesProvider>
         <DownloadsProvider>
-          <Router>
-          <div className="App min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900">
-            {/* Toast Notifications */}
-            <ToastContainer />
-            
-            {/* Navigation */}
-            <Navbar />
-            
-            {/* Routes */}
-            <Routes>
-              {/* Landing Page */}
-              <Route path="/" element={<Landing />} />
-              
-              {/* User Dashboard Routes */}
-              <Route path="/user" element={<Home />} />
-              <Route 
-                path="/user/login" 
-                element={
-                  <RequireGuest>
-                    <Login />
-                  </RequireGuest>
-                } 
-              />
-              <Route 
-                path="/user/register" 
-                element={
-                  <RequireGuest>
-                    <Register />
-                  </RequireGuest>
-                } 
-              />
-              <Route 
-                path="/user/musics" 
-                element={
-                  <RequireAuth>
-                    <ErrorBoundary>
-                      <UserDashboard />
-                    </ErrorBoundary>
-                  </RequireAuth>
-                } 
-              />
-              <Route 
-                path="/user/favorites" 
-                element={
-                  <RequireAuth>
-                    <ErrorBoundary>
-                      <Favorites />
-                    </ErrorBoundary>
-                  </RequireAuth>
-                } 
-              />
-              <Route 
-                path="/user/downloads" 
-                element={
-                  <RequireAuth>
-                    <ErrorBoundary>
-                      <Downloads />
-                    </ErrorBoundary>
-                  </RequireAuth>
-                } 
-              />
-              
-              {/* Admin Dashboard Routes */}
-              <Route path="/admin/login" element={<AdminLogin />} />
-              <Route 
-                path="/admin" 
-                element={
-                  <AdminProtectedRoute>
-                    <AdminDashboard />
-                  </AdminProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/admin/users" 
-                element={
-                  <AdminProtectedRoute>
-                    <UsersManagement />
-                  </AdminProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/admin/musics" 
-                element={
-                  <AdminProtectedRoute>
-                    <MusicManagement />
-                  </AdminProtectedRoute>
-                } 
-              />
-              
-              {/* Catch all route - redirect to landing */}
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </div>
-        </Router>
+          <MusicPlayerProvider>
+            <Router>
+              <div className="App min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900">
+                {/* Toast Notifications */}
+                <ToastContainer />
+                
+                {/* Navigation */}
+                <Navbar />
+                
+                {/* Routes */}
+                <Routes>
+                  {/* Landing Page */}
+                  <Route path="/" element={<Landing />} />
+                  
+                  {/* User Dashboard Routes */}
+                  <Route path="/user" element={<Home />} />
+                  <Route 
+                    path="/user/login" 
+                    element={
+                      <RequireGuest>
+                        <Login />
+                      </RequireGuest>
+                    } 
+                  />
+                  <Route 
+                    path="/user/register" 
+                    element={
+                      <RequireGuest>
+                        <Register />
+                      </RequireGuest>
+                    } 
+                  />
+                  <Route 
+                    path="/user/musics" 
+                    element={
+                      <RequireAuth>
+                        <ErrorBoundary>
+                          <UserDashboard />
+                        </ErrorBoundary>
+                      </RequireAuth>
+                    } 
+                  />
+                  <Route 
+                    path="/user/favorites" 
+                    element={
+                      <RequireAuth>
+                        <ErrorBoundary>
+                          <Favorites />
+                        </ErrorBoundary>
+                      </RequireAuth>
+                    } 
+                  />
+                  <Route 
+                    path="/user/downloads" 
+                    element={
+                      <RequireAuth>
+                        <ErrorBoundary>
+                          <Downloads />
+                        </ErrorBoundary>
+                      </RequireAuth>
+                    } 
+                  />
+                  
+                  {/* Admin Dashboard Routes */}
+                  <Route path="/admin/login" element={<AdminLogin />} />
+                  <Route 
+                    path="/admin" 
+                    element={
+                      <AdminProtectedRoute>
+                        <AdminDashboard />
+                      </AdminProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/admin/users" 
+                    element={
+                      <AdminProtectedRoute>
+                        <UsersManagement />
+                      </AdminProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/admin/musics" 
+                    element={
+                      <AdminProtectedRoute>
+                        <MusicManagement />
+                      </AdminProtectedRoute>
+                    } 
+                  />
+                  
+                  {/* Catch all route - redirect to landing */}
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+
+                {/* Global Audio Player */}
+                <AudioPlayer />
+              </div>
+            </Router>
+          </MusicPlayerProvider>
         </DownloadsProvider>
       </FavoritesProvider>
     </AuthProvider>

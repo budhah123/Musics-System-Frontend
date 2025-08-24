@@ -46,7 +46,7 @@ export default function Home() {
                   <h3 className="text-2xl font-bold text-white mb-4 group-hover:text-indigo-200 transition-colors duration-300">Music Library</h3>
                   <p className="text-indigo-200 mb-6 group-hover:text-indigo-100 transition-colors duration-300">
                     Browse, search, and play your favorite music tracks.
-                    Discover new artists and genres.
+                    Discover new artists and categories.
                   </p>
                   <div className="bg-green-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-green-600 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl">
                     Start Listening
@@ -165,7 +165,7 @@ export default function Home() {
             <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 text-center border border-white/20 hover:scale-105 transition-transform duration-300">
               <FaMusic className="w-12 h-12 text-indigo-400 mx-auto mb-4" />
               <h3 className="text-xl font-bold text-white mb-3">Vast Music Library</h3>
-              <p className="text-indigo-200">Access thousands of tracks across all genres</p>
+              <p className="text-indigo-200">Access thousands of tracks across all categories</p>
             </div>
             
             <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 text-center border border-white/20 hover:scale-105 transition-transform duration-300">

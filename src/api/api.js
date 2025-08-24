@@ -352,7 +352,7 @@ const normalizeMusicData = (musicData) => {
       // Normalize other fields
       title: music.title || music.name || 'Untitled Track',
       artist: music.artist || music.artistName || 'Unknown Artist',
-      genre: music.genre || music.category || 'Unknown Genre',
+      category: music.category || music.genre || 'Unknown Category',
       duration: music.duration || music.length || music.durationInSeconds || null
     };
     
@@ -450,14 +450,14 @@ export async function fetchMusicsForSections(sections = ['trending', 'forYou', '
 }
 
 // Create a new music entry
-export async function createMusic(token, { musicFile, thumbnailFile, title, artist, genre, duration }) {
+export async function createMusic(token, { musicFile, thumbnailFile, title, artist, category, duration }) {
   try {
     const formData = new FormData();
     formData.append('musicFile', musicFile);
     formData.append('thumbnailFile', thumbnailFile);
     formData.append('title', title);
     formData.append('artist', artist);
-    formData.append('genre', genre);
+    formData.append('category', category);
     formData.append('duration', duration);
 
     const res = await fetch(`${API_BASE}/musics`, {

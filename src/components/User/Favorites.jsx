@@ -1,15 +1,15 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FaHeart, FaMusic, FaTrash, FaPlay, FaPause, FaExclamationTriangle, FaSpinner } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
+import { useMusicPlayer } from '../../context/MusicPlayerContext';
 import { fetchUserFavorites, removeFromFavorites } from '../../api/api';
 
 export default function Favorites() {
   const { user, token } = useAuth();
+  const { toggleTrackPlay, isTrackPlaying } = useMusicPlayer();
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [playingId, setPlayingId] = useState(null);
-  const [audioRefs] = useState({});
 
   // Fetch favorites from API on component mount
   useEffect(() => {
@@ -53,12 +53,8 @@ export default function Favorites() {
     fetchFavorites();
   }, [user?.id, token]);
 
-  const handlePlayPause = (musicId) => {
-    if (playingId === musicId) {
-      setPlayingId(null);
-    } else {
-      setPlayingId(musicId);
-    }
+  const handlePlayPause = (music) => {
+    toggleTrackPlay(music);
   };
 
   const handleRemoveFavorite = async (musicId) => {
@@ -77,11 +73,6 @@ export default function Favorites() {
             return music.id !== musicId;
           })
         );
-        
-        // Stop playing if the removed music was playing
-        if (playingId === musicId) {
-          setPlayingId(null);
-        }
         
         console.log('Successfully removed from favorites');
       } else {
@@ -200,10 +191,10 @@ export default function Favorites() {
                 <div className="text-4xl font-bold text-green-300 mb-2">
                   {favorites.filter(fav => {
                     const music = fav.music || fav;
-                    return music.genre;
+                    return music.category;
                   }).length}
                 </div>
-                <div className="text-indigo-200 font-medium">Genres</div>
+                <div className="text-indigo-200 font-medium">Categories</div>
               </div>
               <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
                 <div className="text-4xl font-bold text-purple-300 mb-2">
@@ -249,7 +240,7 @@ export default function Favorites() {
                 const music = favorite.music || favorite;
                 const thumbnailUrl = getThumbnailUrl(music);
                 const audioUrl = getAudioUrl(music);
-                const isPlaying = playingId === music.id;
+                const isPlaying = isTrackPlaying(music.id);
                 
                 return (
                   <div 
@@ -272,7 +263,7 @@ export default function Favorites() {
                       {/* Play Button Overlay */}
                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
                         <button
-                          onClick={() => handlePlayPause(music.id)}
+                          onClick={() => handlePlayPause(music)}
                           disabled={!audioUrl}
                           className={`w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/30 group-hover:scale-110 transition-transform duration-300 ${
                             !audioUrl ? 'cursor-not-allowed opacity-50' : ''
@@ -288,11 +279,11 @@ export default function Favorites() {
                         </button>
                       </div>
 
-                      {/* Genre Badge */}
-                      {music.genre && (
+                      {/* Category Badge */}
+                      {music.category && (
                         <div className="absolute top-2 right-2">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-500/80 text-white backdrop-blur-sm">
-                            {music.genre}
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-500/80 text-white backdrop-blur-sm">
+                            {music.category}
                           </span>
                         </div>
                       )}
@@ -322,7 +313,7 @@ export default function Favorites() {
                         
                         {audioUrl && (
                           <button
-                            onClick={() => handlePlayPause(music.id)}
+                            onClick={() => handlePlayPause(music)}
                             className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
                               isPlaying
                                 ? 'bg-red-500 hover:bg-red-600 text-white'

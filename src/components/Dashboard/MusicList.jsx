@@ -159,7 +159,7 @@ export default function MusicList({ musics, onDelete, userLoggedIn }) {
               <div className="flex-1">
                 <h3 className="text-2xl font-bold text-indigo-600 mb-1">{music.title}</h3>
                 <p className="text-gray-700"><strong>Artist:</strong> {music.artist}</p>
-                <p className="text-gray-700"><strong>Genre:</strong> {music.genre}</p>
+                <p className="text-gray-700"><strong>Category:</strong> {music.category}</p>
                 <p className="text-gray-700 mb-2"><strong>Duration:</strong> {music.duration} mins</p>
 
                 {/* Audio player toggle button */}

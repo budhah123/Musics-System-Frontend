@@ -16,7 +16,7 @@ export default function MusicManagement() {
   const [uploadForm, setUploadForm] = useState({
     title: '',
     artist: '',
-    genre: '',
+    category: '',
     audioFile: null,
     thumbnailFile: null
   });
@@ -131,7 +131,7 @@ export default function MusicManagement() {
         thumbnailFile: uploadForm.thumbnailFile,
         title: uploadForm.title,
         artist: uploadForm.artist,
-        genre: uploadForm.genre,
+        category: uploadForm.category,
         duration: null // We'll get this from the audio file later
       });
       
@@ -142,7 +142,7 @@ export default function MusicManagement() {
       setUploadForm({
         title: '',
         artist: '',
-        genre: '',
+        category: '',
         audioFile: null,
         thumbnailFile: null
       });
@@ -161,7 +161,7 @@ export default function MusicManagement() {
     setUploadForm({
       title: '',
       artist: '',
-      genre: '',
+      category: '',
       audioFile: null,
       thumbnailFile: null
     });
@@ -171,7 +171,7 @@ export default function MusicManagement() {
   const filteredMusics = musics.filter(music =>
     music.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     music.artist?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    music.genre?.toLowerCase().includes(searchTerm.toLowerCase())
+    music.category?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (loading) {
@@ -199,10 +199,10 @@ export default function MusicManagement() {
                 <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-indigo-300" />
                 <input
                   type="text"
-                  placeholder="Search music by title, artist, or genre..."
+                  placeholder="Search music by title, artist, or category..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-indigo-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full pl-10 pr-4 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-indigo-200 focus:ring-2 focus:ring-indigo-500 focus:border-green-500"
                 />
               </div>
             </div>
@@ -262,15 +262,15 @@ export default function MusicManagement() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-white mb-1">
-                    Genre
+                    Category
                   </label>
                   <input
                     type="text"
-                    name="genre"
-                    value={uploadForm.genre}
+                    name="category"
+                    value={uploadForm.category}
                     onChange={handleUploadFormChange}
                     className="w-full bg-white/20 backdrop-blur-sm border border-white/30 rounded-md px-3 py-2 text-white placeholder-indigo-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                    placeholder="Enter genre (optional)"
+                    placeholder="Enter category (optional)"
                   />
                 </div>
                 <div>
@@ -393,12 +393,12 @@ export default function MusicManagement() {
                     {editingMusic?.id === music.id ? (
                       <input
                         type="text"
-                        value={editingMusic.genre || ''}
-                        onChange={(e) => setEditingMusic({...editingMusic, genre: e.target.value})}
+                        value={editingMusic.category || ''}
+                        onChange={(e) => setEditingMusic({...editingMusic, category: e.target.value})}
                         className="w-full bg-white/20 backdrop-blur-sm border border-white/30 rounded px-2 py-1 text-sm text-white"
                       />
                     ) : (
-                      music.genre || 'Unknown Genre'
+                      music.category || 'Unknown Category'
                     )}
                   </p>
                 </div>

@@ -16,7 +16,7 @@ export default function MusicList({ musics, userLoggedIn }) {
   const [playingId, setPlayingId] = useState(null);
   const [showAudioPlayer, setShowAudioPlayer] = useState({});
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedGenre, setSelectedGenre] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState('all');
   const [sortBy, setSortBy] = useState('title');
   const audioRefs = useRef({});
 
@@ -174,9 +174,9 @@ export default function MusicList({ musics, userLoggedIn }) {
         music.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         music.artist?.toLowerCase().includes(searchTerm.toLowerCase());
       
-      const matchesGenre = selectedGenre === 'all' || music.genre === selectedGenre;
+      const matchesCategory = selectedCategory === 'all' || music.category === selectedCategory;
       
-      return matchesSearch && matchesGenre;
+      return matchesSearch && matchesCategory;
     })
     .sort((a, b) => {
       switch (sortBy) {
@@ -184,8 +184,8 @@ export default function MusicList({ musics, userLoggedIn }) {
           return (a.title || '').localeCompare(b.title || '');
         case 'artist':
           return (a.artist || '').localeCompare(b.artist || '');
-        case 'genre':
-          return (a.genre || '').localeCompare(b.genre || '');
+        case 'category':
+          return (a.category || '').localeCompare(b.category || '');
         case 'duration':
           return (a.duration || 0) - (b.duration || 0);
         default:
@@ -193,8 +193,8 @@ export default function MusicList({ musics, userLoggedIn }) {
       }
     });
 
-  // Get unique genres for filter
-  const genres = ['all', ...new Set(safeMusics.map(music => music.genre).filter(Boolean))];
+  // Get unique categories for filter
+  const categories = ['all', ...new Set(safeMusics.map(music => music.category).filter(Boolean))];
 
   // Handle favorite toggle
   const handleFavoriteToggle = async (musicId) => {
@@ -292,16 +292,16 @@ export default function MusicList({ musics, userLoggedIn }) {
             />
           </div>
 
-          {/* Genre Filter */}
+          {/* Category Filter */}
           <div>
             <select
-              value={selectedGenre}
-              onChange={(e) => setSelectedGenre(e.target.value)}
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             >
-              {genres.map(genre => (
-                <option key={genre} value={genre}>
-                  {genre === 'all' ? 'All Genres' : genre}
+              {categories.map(category => (
+                <option key={category} value={category}>
+                  {category === 'all' ? 'All Categories' : category}
                 </option>
               ))}
             </select>
@@ -316,7 +316,7 @@ export default function MusicList({ musics, userLoggedIn }) {
             >
               <option value="title">Sort by Title</option>
               <option value="artist">Sort by Artist</option>
-              <option value="genre">Sort by Genre</option>
+              <option value="category">Sort by Category</option>
               <option value="duration">Sort by Duration</option>
             </select>
           </div>
@@ -370,11 +370,11 @@ export default function MusicList({ musics, userLoggedIn }) {
                   </button>
                 </div>
 
-                {/* Genre Badge */}
-                {music.genre && (
+                {/* Category Badge */}
+                {music.category && (
                   <div className="absolute top-2 right-2">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
-                      {music.genre}
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                      {music.category}
                     </span>
                   </div>
                 )}

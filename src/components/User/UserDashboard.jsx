@@ -95,9 +95,9 @@ export default function UserDashboard() {
               </div>
               <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
                 <div className="text-4xl font-bold text-green-300 mb-2">
-                  {musics.filter(m => m.genre).length}
+                  {musics.filter(m => m.category).length}
                 </div>
-                <div className="text-indigo-200 font-medium">Genres</div>
+                                  <div className="text-indigo-200 font-medium">Categories</div>
               </div>
               <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
                 <div className="text-4xl font-bold text-purple-300 mb-2">

@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 export default function MusicForm({ onCreate }) {
   const [title, setTitle] = useState('');
   const [artist, setArtist] = useState('');
-  const [genre, setGenre] = useState('');
+  const [category, setCategory] = useState('');
   const [duration, setDuration] = useState('');
   const [musicFile, setMusicFile] = useState(null);
   const [thumbnailFile, setThumbnailFile] = useState(null);
@@ -15,7 +15,7 @@ export default function MusicForm({ onCreate }) {
     e.preventDefault();
     setError('');
 
-    if (!title || !artist || !genre || !duration || !musicFile || !thumbnailFile) {
+    if (!title || !artist || !category || !duration || !musicFile || !thumbnailFile) {
       setError('Please fill all fields and upload files');
       return;
     }
@@ -27,10 +27,10 @@ export default function MusicForm({ onCreate }) {
 
     setLoading(true);
     try {
-      await onCreate({ title, artist, genre, duration, musicFile, thumbnailFile });
+      await onCreate({ title, artist, category, duration, musicFile, thumbnailFile });
       setTitle('');
       setArtist('');
-      setGenre('');
+      setCategory('');
       setDuration('');
       setMusicFile(null);
       setThumbnailFile(null);
@@ -76,13 +76,13 @@ export default function MusicForm({ onCreate }) {
       </div>
 
       <div className="mb-4">
-        <label className="block font-semibold mb-1">Genre</label>
+        <label className="block font-semibold mb-1">Category</label>
         <input
           type="text"
-          value={genre}
-          onChange={e => setGenre(e.target.value)}
+          value={category}
+          onChange={e => setCategory(e.target.value)}
           className="w-full border border-gray-300 rounded px-3 py-2"
-          placeholder="Genre"
+          placeholder="Category"
           required
         />
       </div>
