@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FaPlay, FaPause, FaSearch, FaFilter, FaMusic, FaHeart, FaShare, FaDownload } from 'react-icons/fa';
 import { useFavorites } from '../../context/FavoritesContext';
 import { useAuth } from '../../context/AuthContext';
@@ -6,6 +7,7 @@ import { useDownloads } from '../../context/DownloadsContext';
 import axios from 'axios';
 
 export default function MusicList({ musics, userLoggedIn }) {
+  const navigate = useNavigate();
   // Ensure musics is always an array
   const safeMusics = Array.isArray(musics) ? musics : [];
   
@@ -40,6 +42,11 @@ export default function MusicList({ musics, userLoggedIn }) {
         setPlayingId(music.id);
       }, 100);
     }
+  };
+
+  const handleMusicCardClick = (music) => {
+    // Navigate to music detail page
+    navigate(`/music/${music.id}`);
   };
 
   // Download functionality
@@ -339,7 +346,8 @@ export default function MusicList({ musics, userLoggedIn }) {
           return (
             <div
               key={music.id}
-              className="bg-white border border-gray-300 rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-all duration-300"
+              onClick={() => handleMusicCardClick(music)}
+              className="bg-white border border-gray-300 rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105"
             >
               {/* Thumbnail */}
               <div className="relative h-48 bg-gray-200">
@@ -356,7 +364,10 @@ export default function MusicList({ musics, userLoggedIn }) {
                 {/* Play Button Overlay */}
                 <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center">
                   <button
-                    onClick={() => handlePlayIconClick(music)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handlePlayIconClick(music);
+                    }}
                     disabled={!audioUrl}
                     className={`p-3 rounded-full transition-all duration-200 ${
                       !audioUrl
@@ -429,7 +440,10 @@ export default function MusicList({ musics, userLoggedIn }) {
                   <div className="flex space-x-2">
                     {/* Favorite Button */}
                     <button 
-                      onClick={() => handleFavoriteToggle(music.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleFavoriteToggle(music.id);
+                      }}
                       disabled={!isAuthenticated}
                       className={`p-2 transition-colors ${
                         isAuthenticated 
@@ -444,14 +458,20 @@ export default function MusicList({ musics, userLoggedIn }) {
                     </button>
                     
                     {/* Share Button */}
-                    <button className="p-2 text-gray-400 hover:text-blue-500 transition-colors">
+                    <button 
+                      onClick={(e) => e.stopPropagation()}
+                      className="p-2 text-gray-400 hover:text-blue-500 transition-colors"
+                    >
                       <FaShare size={16} />
                     </button>
 
                     {/* Stream Button */}
                     {audioUrl && (
                       <button 
-                        onClick={() => handleStream(music)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleStream(music);
+                        }}
                         className="p-2 text-gray-400 hover:text-green-500 transition-colors"
                         title="Stream in new tab"
                       >
@@ -462,7 +482,10 @@ export default function MusicList({ musics, userLoggedIn }) {
                     {/* Download Button */}
                     {audioUrl && (
                       <button 
-                        onClick={() => handleDownload(music)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDownload(music);
+                        }}
                         disabled={!isAuthenticated || downloadStates[music.id] === 'downloading'}
                         className={`p-2 transition-colors ${
                           !isAuthenticated 

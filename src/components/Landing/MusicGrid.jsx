@@ -123,7 +123,6 @@ export default function MusicGrid({
             music={music}
             onSelection={onMusicSelection}
             isSelected={selectedMusics.has(music.id || music._id)}
-            showSelectionButton={true}
             showPlayButton={false}
             showFavoriteButton={false}
             showDownloadButton={false}

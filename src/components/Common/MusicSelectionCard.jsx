@@ -1,26 +1,25 @@
 import React from 'react';
-import { FaCheck, FaPlus } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
+import { FaCheck } from 'react-icons/fa';
 // import { useMusicPlayer } from '../../context/MusicPlayerContext';
 
 export default function MusicSelectionCard({ 
   music, 
   onSelection, 
   isSelected = false,
-  showSelectionButton = true,
   showPlayButton = false,
   showFavoriteButton = false,
   showDownloadButton = false,
   className = ""
 }) {
+  const navigate = useNavigate();
   // Remove music player context since we don't need play functionality on landing page
   // const { toggleTrackPlay, isTrackPlaying } = useMusicPlayer();
   // const isPlaying = isTrackPlaying(music.musicId || music.id || music._id);
 
-  const handleSelection = (e) => {
-    e.stopPropagation();
-    if (onSelection) {
-      onSelection(music.id || music._id);
-    }
+  const handleCardClick = () => {
+    // Navigate to music detail page
+    navigate(`/music/${music.id || music._id}`);
   };
 
   // Remove play functionality since it's not needed on landing page
@@ -59,7 +58,10 @@ export default function MusicSelectionCard({
   // };
 
   return (
-    <div className={`group bg-white/10 backdrop-blur-lg rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-105 border border-white/20 hover:border-white/40 ${className}`}>
+    <div 
+      onClick={handleCardClick}
+      className={`group bg-white/10 backdrop-blur-lg rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-105 border border-white/20 hover:border-white/40 cursor-pointer ${className}`}
+    >
       {/* Thumbnail */}
       <div className="relative">
         {music?.thumbnail ? (
@@ -82,24 +84,12 @@ export default function MusicSelectionCard({
         
         {/* Play Button Overlay - Removed for landing page */}
 
-        {/* Selection Button */}
-        {showSelectionButton && (
+        {/* Selection Indicator - Shows check mark when selected */}
+        {isSelected && (
           <div className="absolute top-2 left-2">
-            <button
-              onClick={handleSelection}
-              className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${
-                isSelected
-                  ? 'bg-green-500 text-white'
-                  : 'bg-white/20 backdrop-blur-sm text-white hover:bg-white/30'
-              }`}
-              title={isSelected ? 'Selected' : 'Select Music'}
-            >
-              {isSelected ? (
-                <FaCheck size={14} />
-              ) : (
-                <FaPlus size={14} />
-              )}
-            </button>
+            <div className="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center">
+              <FaCheck size={14} />
+            </div>
           </div>
         )}
 

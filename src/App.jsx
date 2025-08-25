@@ -17,6 +17,7 @@ import Home from './components/User/Home';
 import Login from './components/User/Login';
 import Register from './components/User/Register';
 import UserDashboard from './components/User/UserDashboard';
+import MusicDetail from './components/User/MusicDetail';
 import Favorites from './components/User/Favorites';
 import Downloads from './components/User/Downloads';
 import ErrorBoundary from './components/Common/ErrorBoundary';
@@ -93,6 +94,16 @@ function App() {
                           <Downloads />
                         </ErrorBoundary>
                       </RequireAuth>
+                    } 
+                  />
+                  
+                  {/* Music Detail Route */}
+                  <Route 
+                    path="/music/:musicId" 
+                    element={
+                      <ErrorBoundary>
+                        <MusicDetail />
+                      </ErrorBoundary>
                     } 
                   />
                   
