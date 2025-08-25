@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
-import { loginUser, registerUser } from '../api/api';
+import { loginUser, registerUser, associateGuestSelections } from '../api/api';
+import { getOrCreateDeviceId, clearDeviceId } from '../utils/deviceUtils';
 
 // Toast notification types
 export const TOAST_TYPES = {
@@ -194,6 +195,19 @@ export function AuthProvider({ children }) {
       localStorage.setItem('user', JSON.stringify(user));
       localStorage.setItem('token', token);
       
+      // Associate guest selections if deviceId exists
+      try {
+        const deviceId = localStorage.getItem('deviceId');
+        if (deviceId) {
+          await associateGuestSelections(user.id, deviceId);
+          clearDeviceId(); // Clear device ID after association
+          addToast('Your previous selections have been linked to your account!', TOAST_TYPES.SUCCESS);
+        }
+      } catch (associateError) {
+        console.error('Failed to associate guest selections:', associateError);
+        // Don't fail login if association fails
+      }
+      
       dispatch({
         type: AUTH_ACTIONS.LOGIN_SUCCESS,
         payload: { user, token }
@@ -226,6 +240,19 @@ export function AuthProvider({ children }) {
       // Save user data to localStorage
       localStorage.setItem('user', JSON.stringify(user));
       localStorage.setItem('token', token);
+      
+      // Associate guest selections if deviceId exists
+      try {
+        const deviceId = localStorage.getItem('deviceId');
+        if (deviceId) {
+          await associateGuestSelections(user.id, deviceId);
+          clearDeviceId(); // Clear device ID after association
+          addToast('Your previous selections have been linked to your account!', TOAST_TYPES.SUCCESS);
+        }
+      } catch (associateError) {
+        console.error('Failed to associate guest selections:', associateError);
+        // Don't fail registration if association fails
+      }
       
       dispatch({
         type: AUTH_ACTIONS.REGISTER_SUCCESS,

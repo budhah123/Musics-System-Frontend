@@ -1,8 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { fetchMusics } from '../../api/api';
-import { FaPlay, FaClock, FaUser, FaMusic } from 'react-icons/fa';
+import { FaMusic } from 'react-icons/fa';
+import MusicSelectionCard from '../Common/MusicSelectionCard';
 
-export default function MusicGrid({ sectionType = 'trending', onMusicCardClick }) {
+export default function MusicGrid({ 
+  sectionType = 'trending', 
+  onMusicCardClick, 
+  onMusicSelection, 
+  selectedMusics = new Set() 
+}) {
   const [musics, setMusics] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -25,22 +31,23 @@ export default function MusicGrid({ sectionType = 'trending', onMusicCardClick }
     loadMusics();
   }, []);
 
-  const formatDuration = (duration) => {
-    if (!duration) return '--:--';
-    
-    // If duration is already in MM:SS format, return as is
-    if (typeof duration === 'string' && duration.includes(':')) {
-      return duration;
-    }
-    
-    // If duration is in seconds, convert to MM:SS
-    const seconds = parseInt(duration);
-    if (isNaN(seconds)) return '--:--';
-    
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-  };
+  // Duration formatting removed since we're not displaying duration on landing page
+  // const formatDuration = (duration) => {
+  //   if (!duration) return '--:--';
+  //   
+  //   // If duration is already in MM:SS format, return as is
+  //   if (typeof duration === 'string' && duration.includes(':')) {
+  //     return duration;
+  //   }
+  //   
+  //   // If duration is in seconds, convert to MM:SS
+  //   const seconds = parseInt(duration);
+  //   if (isNaN(seconds)) return '----';
+  //   
+  //   const minutes = Math.floor(seconds / 60);
+  //   const remainingSeconds = seconds % 60;
+  //   return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+  // };
 
   const getSectionMusics = () => {
     if (!musics || musics.length === 0) return [];
@@ -51,16 +58,16 @@ export default function MusicGrid({ sectionType = 'trending', onMusicCardClick }
     
     switch (sectionType) {
       case 'trending':
-        // Show first 6 musics as trending
-        return musics.slice(0, Math.min(6, totalMusics));
+        // Show first 10 musics as trending (2 rows of 5)
+        return musics.slice(0, Math.min(10, totalMusics));
       case 'forYou':
-        // Show next 6 musics as recommendations
-        return musics.slice(6, Math.min(12, totalMusics));
+        // Show next 10 musics as recommendations (2 rows of 5)
+        return musics.slice(10, Math.min(20, totalMusics));
       case 'others':
         // Show remaining musics
-        return musics.slice(12);
+        return musics.slice(20);
       default:
-        return musics.slice(0, 6);
+        return musics.slice(0, 10);
     }
   };
 
@@ -104,71 +111,23 @@ export default function MusicGrid({ sectionType = 'trending', onMusicCardClick }
     );
   }
 
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
+    return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
       {sectionMusics.map((music, index) => (
         <div
           key={music.id || music._id}
-          className="group cursor-pointer animate-fade-in transform transition-all duration-300 hover:scale-105"
+          className="animate-fade-in transform transition-all duration-300"
           style={{ animationDelay: `${index * 0.1}s` }}
-          onClick={onMusicCardClick}
         >
-          {/* Music Card */}
-          <div className="music-card bg-white/10 backdrop-blur-lg rounded-2xl p-4 hover:bg-white/20 transition-all duration-300 hover:shadow-2xl hover:shadow-black/40 border border-white/20 hover:border-white/40 overflow-hidden relative">
-            {/* Hover overlay effect */}
-            <div className="absolute inset-0 bg-gradient-to-t from-indigo-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
-            
-            {/* Thumbnail Container */}
-            <div className="relative mb-4">
-              <div className="aspect-square w-full overflow-hidden rounded-xl bg-gradient-to-br from-gray-800 to-gray-900 group-hover:shadow-lg transition-all duration-300">
-                {music.thumbnail ? (
-                  <img
-                    src={music.thumbnail}
-                    alt={music.title}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                    onError={(e) => {
-                      e.target.src = '/default-thumbnail.svg';
-                    }}
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-600 to-purple-600">
-                    <FaMusic className="w-12 h-12 text-white/80" />
-                  </div>
-                )}
-                
-                {/* Play Button Overlay */}
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
-                  <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/30 group-hover:scale-110 transition-transform duration-300">
-                    <FaPlay size={20} className="text-white text-lg ml-1" />
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Music Info */}
-            <div className="space-y-3 relative z-10">
-              {/* Title */}
-              <div>
-                <h3 className="text-white font-bold text-sm leading-tight line-clamp-2 group-hover:text-indigo-200 transition-colors duration-300">
-                  {music.title || 'Unknown Title'}
-                </h3>
-              </div>
-              
-              {/* Artist */}
-              <div className="flex items-center space-x-2 text-indigo-200 text-xs">
-                <FaUser size={16} className="text-indigo-400 flex-shrink-0" />
-                <span className="line-clamp-1 font-medium">
-                  {music.artist || 'Unknown Artist'}
-                </span>
-              </div>
-              
-              {/* Duration */}
-              <div className="flex items-center space-x-2 text-indigo-200 text-xs">
-                <FaClock size={16} className="text-indigo-400 flex-shrink-0" />
-                <span className="font-medium">{formatDuration(music.duration)}</span>
-              </div>
-            </div>
-          </div>
+          <MusicSelectionCard
+            music={music}
+            onSelection={onMusicSelection}
+            isSelected={selectedMusics.has(music.id || music._id)}
+            showSelectionButton={true}
+            showPlayButton={false}
+            showFavoriteButton={false}
+            showDownloadButton={false}
+          />
         </div>
       ))}
     </div>

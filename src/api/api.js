@@ -677,6 +677,182 @@ export async function deleteUser(token, id) {
   }
 }
 
+// ===== MUSIC SELECTION API FUNCTIONS =====
+
+// Save music selection (for both guests and logged-in users)
+export async function saveMusicSelection(musicId, userId = null, deviceId = null) {
+  try {
+    console.log('API: Saving music selection - Music:', musicId, 'User:', userId, 'Device:', deviceId);
+    
+    // Call the backend API to save music selection
+    const requestBody = {
+      musicId: musicId
+    };
+    
+    if (userId) {
+      requestBody.userId = userId;
+    }
+    if (deviceId) {
+      requestBody.deviceId = deviceId;
+    }
+    
+    console.log('API: Request body for saveMusicSelection:', requestBody);
+    
+    const res = await fetch(`${API_BASE}/selection-musics`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      mode: 'cors',
+      body: JSON.stringify(requestBody)
+    });
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error('API: saveMusicSelection failed with status:', res.status, 'Error:', errorText);
+      throw new Error(`Failed to save music selection (${res.status}): ${errorText}`);
+    }
+
+    const data = await res.json();
+    console.log('API: Music selection saved successfully:', data);
+    return data;
+  } catch (error) {
+    console.error('API: saveMusicSelection error:', error);
+    throw new Error(error.message || 'Failed to save music selection');
+  }
+}
+
+// Associate guest selections with user account after login/registration
+export async function associateGuestSelections(userId, deviceId) {
+  try {
+    console.log('API: Associating guest selections - User:', userId, 'Device:', deviceId);
+    
+    // Call the backend API to associate guest selections with user
+    const requestBody = {
+      userId: userId,
+      deviceId: deviceId
+    };
+    
+    console.log('API: Request body for associateGuestSelections:', requestBody);
+    
+    const res = await fetch(`${API_BASE}/selection-musics/associate-guest`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      mode: 'cors',
+      body: JSON.stringify(requestBody)
+    });
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error('API: associateGuestSelections failed with status:', res.status, 'Error:', errorText);
+      throw new Error(`Failed to associate guest selections (${res.status}): ${errorText}`);
+    }
+
+    const data = await res.json();
+    console.log('API: Guest selections associated successfully:', data);
+    return data;
+  } catch (error) {
+    console.error('API: associateGuestSelections error:', error);
+    throw new Error(error.message || 'Failed to associate guest selections');
+  }
+}
+
+// Fetch selected musics for user or device
+export async function fetchSelectedMusics(userId = null, deviceId = null) {
+  try {
+    console.log('API: Fetching selected musics - User:', userId, 'Device:', deviceId);
+    
+    // Call the backend API to fetch selected musics
+    let url = `${API_BASE}/selection-musics`;
+    const params = new URLSearchParams();
+    
+    if (userId) {
+      params.append('userId', userId);
+    }
+    if (deviceId) {
+      params.append('deviceId', deviceId);
+    }
+    
+    if (params.toString()) {
+      url += `?${params.toString()}`;
+    }
+    
+    console.log('API: Fetching from URL:', url);
+    
+    const res = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      mode: 'cors'
+    });
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error('API: fetchSelectedMusics failed with status:', res.status, 'Error:', errorText);
+      throw new Error(`Failed to fetch selected musics (${res.status}): ${errorText}`);
+    }
+
+    const data = await res.json();
+    console.log('API: Selected musics fetched successfully:', data);
+    return data;
+  } catch (error) {
+    console.error('API: fetchSelectedMusics error:', error);
+    throw new Error(error.message || 'Failed to fetch selected musics');
+  }
+}
+
+// ===== MUSIC SELECTION REMOVAL =====
+
+// Remove music selection (for both guests and logged-in users)
+export async function removeMusicSelection(musicId, userId = null, deviceId = null) {
+  try {
+    console.log('API: Removing music selection - Music:', musicId, 'User:', userId, 'Device:', deviceId);
+    
+    // Call the backend API to remove music selection
+    const requestBody = {
+      musicId: musicId
+    };
+    
+    if (userId) {
+      requestBody.userId = userId;
+    }
+    if (deviceId) {
+      requestBody.deviceId = deviceId;
+    }
+    
+    console.log('API: Request body for removeMusicSelection:', requestBody);
+    
+    const res = await fetch(`${API_BASE}/selection-musics`, {
+      method: 'DELETE',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      mode: 'cors',
+      body: JSON.stringify(requestBody)
+    });
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error('API: removeMusicSelection failed with status:', res.status, 'Error:', errorText);
+      throw new Error(`Failed to remove music selection (${res.status}): ${errorText}`);
+    }
+
+    const data = await res.json();
+    console.log('API: Music selection removed successfully:', data);
+    return data;
+  } catch (error) {
+    console.error('API: removeMusicSelection error:', error);
+    throw new Error(error.message || 'Failed to remove music selection');
+  }
+}
+
 // ===== FAVORITES API FUNCTIONS =====
 
 // Fetch all favorites for a user

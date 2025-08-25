@@ -1,17 +1,91 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaUsers, FaUserCog, FaMusic } from 'react-icons/fa';
+import { FaUsers, FaUserCog, FaMusic, FaArrowRight } from 'react-icons/fa';
 import MusicGrid from './MusicGrid';
+import { useAuth } from '../../context/AuthContext';
+import { getOrCreateDeviceId, isGuestUser, getUserId } from '../../utils/deviceUtils';
+import { saveMusicSelection, removeMusicSelection, fetchSelectedMusics } from '../../api/api';
 
 export default function Landing() {
   const navigate = useNavigate();
+  const { user, isAuthenticated, addToast } = useAuth();
+  const [selectedMusics, setSelectedMusics] = useState(new Set());
+
+  // Initialize device ID for guest users and load existing selections
+  useEffect(() => {
+    if (isGuestUser()) {
+      const deviceId = getOrCreateDeviceId();
+      // Load existing selections for this device
+      loadExistingSelections(null, deviceId);
+    } else if (isAuthenticated && user) {
+      // Load existing selections for logged-in user
+      loadExistingSelections(getUserId(), null);
+    }
+  }, [isAuthenticated, user]);
+
+  const loadExistingSelections = async (userId, deviceId) => {
+    try {
+      const selections = await fetchSelectedMusics(userId, deviceId);
+      const selectionIds = new Set(selections.map(item => item.musicId));
+      setSelectedMusics(selectionIds);
+    } catch (error) {
+      console.error('Failed to load existing selections:', error);
+    }
+  };
 
   const handleDashboardClick = (path) => {
-    navigate(path);
+    if (isAuthenticated && user) {
+      // User is logged in, navigate to User Dashboard
+      navigate('/user');
+    } else {
+      // User is a guest, redirect to Login page
+      navigate('/user/login');
+    }
   };
 
   const handleMusicCardClick = () => {
     navigate('/user/login');
+  };
+
+  const handleMusicSelection = async (musicId) => {
+    try {
+      const isCurrentlySelected = selectedMusics.has(musicId);
+      
+      if (isCurrentlySelected) {
+        // Remove selection
+        if (isAuthenticated && user) {
+          await removeMusicSelection(musicId, getUserId());
+          addToast('Music removed from your selection!', 'success');
+        } else {
+          const deviceId = getOrCreateDeviceId();
+          await removeMusicSelection(musicId, null, deviceId);
+          addToast('Music removed from your selection!', 'success');
+        }
+        
+        // Update local state
+        setSelectedMusics(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(musicId);
+          return newSet;
+        });
+      } else {
+        // Add selection
+        if (isAuthenticated && user) {
+          await saveMusicSelection(musicId, getUserId());
+          addToast('Music added to your selection!', 'success');
+        } else {
+          const deviceId = getOrCreateDeviceId();
+          await saveMusicSelection(musicId, null, deviceId);
+          addToast('Music added to your selection!', 'success');
+        }
+        
+        // Update local state
+        setSelectedMusics(prev => new Set([...prev, musicId]));
+      }
+    } catch (error) {
+      console.error('Failed to handle music selection:', error);
+      addToast(`Failed to ${isCurrentlySelected ? 'remove' : 'add'} music selection`, 'error');
+    }
   };
 
   // Debug: Check if icons are imported
@@ -38,7 +112,8 @@ export default function Landing() {
                 className="btn-hover bg-indigo-500 hover:bg-indigo-600 text-white px-6 py-3 rounded-xl font-medium transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl flex items-center space-x-2"
               >
                 <FaUsers size={20} className="text-lg" />
-                <span>User Dashboard</span>
+                <span>{isAuthenticated && user ? 'Go to Dashboard' : 'Go to Dashboard'}</span>
+                <FaArrowRight size={16} className="ml-2" />
               </button>
               
               <button
@@ -75,6 +150,8 @@ export default function Landing() {
             <MusicGrid 
               sectionType="trending" 
               onMusicCardClick={handleMusicCardClick}
+              onMusicSelection={handleMusicSelection}
+              selectedMusics={selectedMusics}
             />
           </section>
 
@@ -87,6 +164,8 @@ export default function Landing() {
             <MusicGrid 
               sectionType="forYou" 
               onMusicCardClick={handleMusicCardClick}
+              onMusicSelection={handleMusicSelection}
+              selectedMusics={selectedMusics}
             />
           </section>
 
@@ -99,6 +178,8 @@ export default function Landing() {
             <MusicGrid 
               sectionType="others" 
               onMusicCardClick={handleMusicCardClick}
+              onMusicSelection={handleMusicSelection}
+              selectedMusics={selectedMusics}
             />
           </section>
         </div>
